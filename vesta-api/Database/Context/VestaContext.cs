@@ -28,6 +28,8 @@ public partial class VestaContext : DbContext
 
     public virtual DbSet<Role> Roles { get; set; }
 
+    public virtual DbSet<Service> Services { get; set; }
+
     public virtual DbSet<Test> Tests { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
@@ -46,6 +48,7 @@ public partial class VestaContext : DbContext
                 .HasColumnType("timestamp(3) without time zone")
                 .HasColumnName("dateTime");
             entity.Property(e => e.EmployeeId).HasColumnName("employeeId");
+            entity.Property(e => e.Serviceid).HasColumnName("serviceid");
 
             entity.HasOne(d => d.Client).WithMany(p => p.Appointments)
                 .HasForeignKey(d => d.ClientId)
@@ -56,6 +59,10 @@ public partial class VestaContext : DbContext
                 .HasForeignKey(d => d.EmployeeId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("Appointment_employeeId_fkey");
+
+            entity.HasOne(d => d.Service).WithMany(p => p.Appointments)
+                .HasForeignKey(d => d.Serviceid)
+                .HasConstraintName("appointment_serviceid__fk");
         });
 
         modelBuilder.Entity<Client>(entity =>
@@ -164,6 +171,17 @@ public partial class VestaContext : DbContext
             entity.Property(e => e.Name).HasColumnName("name");
         });
 
+        modelBuilder.Entity<Service>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("service_pk");
+
+            entity.ToTable("Service");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Duration).HasColumnName("duration");
+            entity.Property(e => e.Name).HasColumnName("name");
+        });
+
         modelBuilder.Entity<Test>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("Test_pkey");
@@ -175,6 +193,7 @@ public partial class VestaContext : DbContext
             entity.Property(e => e.TestingDate)
                 .HasColumnType("timestamp(3) without time zone")
                 .HasColumnName("testingDate");
+            entity.Property(e => e.Url).HasColumnName("url");
 
             entity.HasOne(d => d.Client).WithMany(p => p.Tests)
                 .HasForeignKey(d => d.ClientId)

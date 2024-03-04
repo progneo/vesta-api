@@ -38,6 +38,16 @@ namespace vesta_api.Controllers
             return appointment;
         }
 
+        // GET: api/Appointments/5
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [HttpGet("Client/{id}"), Authorize(Roles = "clientSpecialist, admin")]
+        public async Task<ActionResult<IEnumerable<Appointment>>> GetAppointmentByClientId(int id)
+        {
+            return await context.Appointments.Where(a => a.ClientId == id).ToListAsync();
+        }
+
         // PUT: api/Appointments/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [ProducesResponseType(StatusCodes.Status200OK)]

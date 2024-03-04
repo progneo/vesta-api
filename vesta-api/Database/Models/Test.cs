@@ -8,5 +8,7 @@ public partial class Test
 
     public int ClientId { get; set; }
 
+    public string Url { get; set; } = null!;
+
     public virtual Client Client { get; set; } = null!;
 }

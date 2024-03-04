@@ -10,7 +10,11 @@ public partial class Appointment
 
     public int EmployeeId { get; set; }
 
+    public int? Serviceid { get; set; }
+
     public virtual Client Client { get; set; } = null!;
 
     public virtual Employee Employee { get; set; } = null!;
+
+    public virtual Service? Service { get; set; }
 }
