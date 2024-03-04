@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "vesta-api", "vesta-api\vesta-api.csproj", "{FDCD5DC4-E99A-4190-92D1-B184E1B03E10}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FDCD5DC4-E99A-4190-92D1-B184E1B03E10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDCD5DC4-E99A-4190-92D1-B184E1B03E10}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDCD5DC4-E99A-4190-92D1-B184E1B03E10}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDCD5DC4-E99A-4190-92D1-B184E1B03E10}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
