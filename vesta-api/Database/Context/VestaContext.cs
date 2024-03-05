@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using vesta_api.Database.Models;
 
 namespace vesta_api.Database.Context;
@@ -7,11 +7,13 @@ public partial class VestaContext : DbContext
 {
     public VestaContext()
     {
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
     }
 
     public VestaContext(DbContextOptions<VestaContext> options)
         : base(options)
     {
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
     }
 
     public virtual DbSet<Appointment> Appointments { get; set; }
@@ -20,13 +22,11 @@ public partial class VestaContext : DbContext
 
     public virtual DbSet<Employee> Employees { get; set; }
 
-    public virtual DbSet<Father> Fathers { get; set; }
+    public virtual DbSet<Adult> Adults { get; set; }
 
-    public virtual DbSet<Mother> Mothers { get; set; }
+    public virtual DbSet<AdultOfClient> AdultsOfClient { get; set; }
 
     public virtual DbSet<Note> Notes { get; set; }
-
-    public virtual DbSet<Role> Roles { get; set; }
 
     public virtual DbSet<Service> Services { get; set; }
 
@@ -71,32 +71,16 @@ public partial class VestaContext : DbContext
 
             entity.ToTable("Client");
 
-            entity.HasIndex(e => e.FatherId, "Client_fatherId_key").IsUnique();
-
-            entity.HasIndex(e => e.MotherId, "Client_motherId_key").IsUnique();
-
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Address).HasColumnName("address");
             entity.Property(e => e.BirthDate)
                 .HasColumnType("timestamp(3) without time zone")
                 .HasColumnName("birthDate");
-            entity.Property(e => e.FatherId).HasColumnName("fatherId");
             entity.Property(e => e.FirstName).HasColumnName("firstName");
             entity.Property(e => e.Gender).HasColumnName("gender");
             entity.Property(e => e.IdentityDocument).HasColumnName("identityDocument");
             entity.Property(e => e.LastName).HasColumnName("lastName");
-            entity.Property(e => e.MotherId).HasColumnName("motherId");
             entity.Property(e => e.Patronymic).HasColumnName("patronymic");
-
-            entity.HasOne(d => d.Father).WithOne(p => p.Client)
-                .HasForeignKey<Client>(d => d.FatherId)
-                .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("Client_fatherId_fkey");
-
-            entity.HasOne(d => d.Mother).WithOne(p => p.Client)
-                .HasForeignKey<Client>(d => d.MotherId)
-                .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("Client_motherId_fkey");
         });
 
         modelBuilder.Entity<Employee>(entity =>
@@ -117,11 +101,11 @@ public partial class VestaContext : DbContext
             entity.Property(e => e.Phone).HasColumnName("phone");
         });
 
-        modelBuilder.Entity<Father>(entity =>
+        modelBuilder.Entity<Adult>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("Father_pkey");
+            entity.HasKey(e => e.Id).HasName("Adult_pkey");
 
-            entity.ToTable("Father");
+            entity.ToTable("Adult");
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.FirstName).HasColumnName("firstName");
@@ -129,20 +113,8 @@ public partial class VestaContext : DbContext
             entity.Property(e => e.LastName).HasColumnName("lastName");
             entity.Property(e => e.Patronymic).HasColumnName("patronymic");
             entity.Property(e => e.Phone).HasColumnName("phone");
-        });
-
-        modelBuilder.Entity<Mother>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("Mother_pkey");
-
-            entity.ToTable("Mother");
-
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.FirstName).HasColumnName("firstName");
-            entity.Property(e => e.IdentityDocument).HasColumnName("identityDocument");
-            entity.Property(e => e.LastName).HasColumnName("lastName");
-            entity.Property(e => e.Patronymic).HasColumnName("patronymic");
             entity.Property(e => e.Phone).HasColumnName("phone");
+            entity.Property(e => e.Type).HasColumnName("type");
         });
 
         modelBuilder.Entity<Note>(entity =>
@@ -159,16 +131,6 @@ public partial class VestaContext : DbContext
                 .HasForeignKey(d => d.ClientId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("Note_clientId_fkey");
-        });
-
-        modelBuilder.Entity<Role>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("Role_pkey");
-
-            entity.ToTable("Role");
-
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.Name).HasColumnName("name");
         });
 
         modelBuilder.Entity<Service>(entity =>
@@ -211,25 +173,35 @@ public partial class VestaContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.EmployeeId).HasColumnName("employeeId");
+            entity.Property(e => e.Role).HasColumnName("role");
             entity.Property(e => e.IsActive).HasColumnName("isActive");
             entity.Property(e => e.PasswordHash).HasColumnName("passwordHash");
             entity.Property(e => e.PasswordKey).HasColumnName("passwordKey");
-            entity.Property(e => e.RoleId).HasColumnName("roleId");
             entity.Property(e => e.Username).HasColumnName("username");
 
             entity.HasOne(d => d.Employee).WithMany(p => p.Users)
                 .HasForeignKey(d => d.EmployeeId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("User_employeeId_fkey");
+        });
 
-            entity.HasOne(d => d.Role).WithMany(p => p.Users)
-                .HasForeignKey(d => d.RoleId)
-                .OnDelete(DeleteBehavior.Restrict)
-                .HasConstraintName("User_roleId_fkey");
+        modelBuilder.Entity<AdultOfClient>(entity =>
+        {
+            entity.ToTable("AdultOfClient");
+
+            entity.HasKey(e => new { e.ClientId, e.AdultId });
+
+            entity
+                .HasOne(e => e.Client)
+                .WithMany(e => e.AdultsOfClient)
+                .HasForeignKey(e => e.ClientId)
+                .HasConstraintName("client_id");
         });
 
         OnModelCreatingPartial(modelBuilder);
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+
+    public DbSet<vesta_api.Database.Models.AdultOfClient> AdultOfClient { get; set; } = default!;
 }

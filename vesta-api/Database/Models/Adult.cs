@@ -1,6 +1,6 @@
 ﻿namespace vesta_api.Database.Models;
 
-public partial class Father
+public partial class Adult
 {
     public int Id { get; set; }
 
@@ -14,5 +14,5 @@ public partial class Father
 
     public string IdentityDocument { get; set; } = null!;
 
-    public virtual Client? Client { get; set; }
+    public string Type { get; set; } = null!;
 }

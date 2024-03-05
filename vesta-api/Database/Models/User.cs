@@ -10,13 +10,11 @@ public partial class User
 
     public byte[] PasswordHash { get; set; } = null!;
 
+    public string Role { get; set; }
+
     public bool IsActive { get; set; }
 
     public int EmployeeId { get; set; }
 
-    public int RoleId { get; set; }
-
     public virtual Employee Employee { get; set; } = null!;
-
-    public virtual Role Role { get; set; } = null!;
 }

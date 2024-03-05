@@ -18,17 +18,11 @@ public partial class Client
 
     public string IdentityDocument { get; set; } = null!;
 
-    public int? MotherId { get; set; }
-
-    public int? FatherId { get; set; }
-
     public virtual ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
-
-    public virtual Father? Father { get; set; }
-
-    public virtual Mother? Mother { get; set; }
 
     public virtual ICollection<Note> Notes { get; set; } = new List<Note>();
 
     public virtual ICollection<Test> Tests { get; set; } = new List<Test>();
+
+    public virtual ICollection<AdultOfClient>? AdultsOfClient { get; set; } = new List<AdultOfClient>();
 }

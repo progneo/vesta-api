@@ -10,47 +10,47 @@ namespace vesta_api.Controllers
     [ApiController]
     [Produces("application/json")]
     [Authorize]
-    public class FathersController(VestaContext context) : ControllerBase
+    public class AdultsController(VestaContext context) : ControllerBase
     {
-        // GET: api/Fathers
+        // GET: api/Adults
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpGet, Authorize(Roles = "clientSpecialist, admin")]
-        public async Task<ActionResult<IEnumerable<Father>>> GetFathers()
+        public async Task<ActionResult<IEnumerable<Adult>>> GetAdults()
         {
-            return await context.Fathers.ToListAsync();
+            return await context.Adults.ToListAsync();
         }
 
-        // GET: api/Fathers/5
+        // GET: api/Adults/5
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpGet("{id}"), Authorize(Roles = "clientSpecialist, admin")]
-        public async Task<ActionResult<Father>> GetFather(int id)
+        public async Task<ActionResult<Adult>> GetAdult(int id)
         {
-            var father = await context.Fathers.FindAsync(id);
+            var adult = await context.Adults.FindAsync(id);
 
-            if (father == null)
+            if (adult == null)
             {
                 return NotFound();
             }
 
-            return father;
+            return adult;
         }
 
-        // PUT: api/Fathers/5
+        // PUT: api/Adults/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpPut("{id}"), Authorize(Roles = "clientSpecialist, admin")]
-        public async Task<IActionResult> PutFather(int id, Father father)
+        public async Task<IActionResult> PutAdult(int id, Adult adult)
         {
-            if (id != father.Id)
+            if (id != adult.Id)
             {
                 return BadRequest();
             }
 
-            context.Entry(father).State = EntityState.Modified;
+            context.Entry(adult).State = EntityState.Modified;
 
             try
             {
@@ -58,7 +58,7 @@ namespace vesta_api.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!FatherExists(id))
+                if (!AdultExists(id))
                 {
                     return NotFound();
                 }
@@ -71,40 +71,40 @@ namespace vesta_api.Controllers
             return NoContent();
         }
 
-        // POST: api/Fathers
+        // POST: api/Adults
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpPost, Authorize(Roles = "clientSpecialist, admin")]
-        public async Task<ActionResult<Father>> PostFather(Father father)
+        public async Task<ActionResult<Adult>> PostAdult(Adult adult)
         {
-            context.Fathers.Add(father);
+            context.Adults.Add(adult);
             await context.SaveChangesAsync();
 
-            return CreatedAtAction("GetFather", new { id = father.Id }, father);
+            return CreatedAtAction("GetAdult", new { id = adult.Id }, adult);
         }
 
-        // DELETE: api/Fathers/5
+        // DELETE: api/Adults/5
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpDelete("{id}"), Authorize(Roles = "clientSpecialist, admin")]
-        public async Task<IActionResult> DeleteFather(int id)
+        public async Task<IActionResult> DeleteAdult(int id)
         {
-            var father = await context.Fathers.FindAsync(id);
-            if (father == null)
+            var adult = await context.Adults.FindAsync(id);
+            if (adult == null)
             {
                 return NotFound();
             }
 
-            context.Fathers.Remove(father);
+            context.Adults.Remove(adult);
             await context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool FatherExists(int id)
+        private bool AdultExists(int id)
         {
-            return context.Fathers.Any(e => e.Id == id);
+            return context.Adults.Any(e => e.Id == id);
         }
     }
 }

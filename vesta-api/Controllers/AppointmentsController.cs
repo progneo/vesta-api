@@ -45,7 +45,7 @@ namespace vesta_api.Controllers
         [HttpGet("Client/{id}"), Authorize(Roles = "clientSpecialist, admin")]
         public async Task<ActionResult<IEnumerable<Appointment>>> GetAppointmentByClientId(int id)
         {
-            return await context.Appointments.Where(a => a.ClientId == id).ToListAsync();
+            return await context.Appointments.Where(a => a.ClientId == id).Include(a => a.Service).ToListAsync();
         }
 
         // PUT: api/Appointments/5

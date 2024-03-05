@@ -34,9 +34,9 @@ public class AuthenticationController(VestaContext context) : ControllerBase
             Username = request.Username,
             PasswordHash = passwordHash,
             PasswordKey = passwordKey,
+            Role = request.Role,
             IsActive = true,
-            EmployeeId = request.EmployeeId,
-            RoleId = request.RoleId
+            EmployeeId = request.EmployeeId
         };
 
         context.Users.Add(user);
@@ -69,7 +69,7 @@ public class AuthenticationController(VestaContext context) : ControllerBase
         var claims = new List<Claim>
         {
             new(ClaimsIdentity.DefaultNameClaimType, user.Username),
-            new(ClaimsIdentity.DefaultRoleClaimType, user.Role.Name)
+            new(ClaimsIdentity.DefaultRoleClaimType, user.Role)
         };
 
         var id = new ClaimsIdentity(
@@ -101,7 +101,6 @@ public class AuthenticationController(VestaContext context) : ControllerBase
         var username = User.FindFirst(c => c.Type == ClaimsIdentity.DefaultNameClaimType)!.Value;
         var user = context.Users
             .Include(u => u.Employee)
-            .Include(user => user.Role)
             .First(u => u.Username == username);
 
         return Task.FromResult<IActionResult>(Ok(new
@@ -109,7 +108,7 @@ public class AuthenticationController(VestaContext context) : ControllerBase
             firstName = user.Employee.FirstName,
             lastName = user.Employee.LastName,
             patronymic = user.Employee.Patronymic,
-            role = user.Role.Name
+            role = user.Role
         }));
     }
 

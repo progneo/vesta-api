@@ -6,7 +6,7 @@ public class NewUserViewModel
 
     public string Password { get; set; } = string.Empty;
 
-    public int EmployeeId { get; set; }
+    public string Role { get; set; } = string.Empty;
 
-    public int RoleId { get; set; }
+    public int EmployeeId { get; set; }
 }

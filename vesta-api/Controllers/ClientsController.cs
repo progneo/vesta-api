@@ -16,9 +16,40 @@ namespace vesta_api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpGet, Authorize(Roles = "clientSpecialist, admin")]
-        public async Task<ActionResult<IEnumerable<Client>>> GetClients()
+        public async Task<ActionResult<IEnumerable<Client>>> GetClients(
+            [FromQuery(Name = "firstName")] string? firstName,
+            [FromQuery(Name = "lastName")] string? lastName,
+            [FromQuery(Name = "patronymic")] string? patronymic,
+            [FromQuery(Name = "birthDate")] string? birthDate
+        )
         {
-            return await context.Clients.ToListAsync();
+            var clients = await context.Clients.ToListAsync();
+
+            if (firstName != null)
+            {
+                clients = clients.Where(c => c.FirstName.Contains(firstName, StringComparison.CurrentCultureIgnoreCase))
+                    .ToList();
+            }
+
+            if (lastName != null)
+            {
+                clients = clients.Where(c => c.LastName.Contains(lastName, StringComparison.CurrentCultureIgnoreCase))
+                    .ToList();
+            }
+
+            if (patronymic != null)
+            {
+                clients = clients.Where(c =>
+                        c.Patronymic.Contains(patronymic, StringComparison.CurrentCultureIgnoreCase))
+                    .ToList();
+            }
+
+            if (birthDate != null)
+            {
+                clients = clients.Where(c => c.BirthDate.ToString("yyyy-MM-dd").Equals(birthDate)).ToList();
+            }
+
+            return clients;
         }
 
         // GET: api/Clients/5
@@ -29,8 +60,8 @@ namespace vesta_api.Controllers
         public async Task<ActionResult<Client>> GetClient(int id)
         {
             var client = await context.Clients
-                .Include(c => c.Mother)
-                .Include(c => c.Father)
+                .Include(c => c.AdultsOfClient)!
+                .ThenInclude(a => a.Adult)
                 .Include(c => c.Notes)
                 .FirstOrDefaultAsync(c => c.Id == id);
 
@@ -80,12 +111,21 @@ namespace vesta_api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpPost, Authorize(Roles = "clientSpecialist, admin")]
-        public async Task<ActionResult<Client>> PostClient(Client client)
+        public async Task<ActionResult<Client>> PostClient(ClientViewModel client)
         {
-            context.Clients.Add(client);
+            var newClient = context.Clients.Add(new Client()
+            {
+                FirstName = client.FirstName,
+                LastName = client.LastName,
+                Patronymic = client.Patronymic,
+                Gender = client.Gender,
+                BirthDate = client.BirthDate,
+                Address = client.Address,
+                IdentityDocument = client.IdentityDocument,
+            });
             await context.SaveChangesAsync();
 
-            return CreatedAtAction("GetClient", new { id = client.Id }, client);
+            return CreatedAtAction("GetClient", new { id = newClient.Entity.Id }, newClient.Entity);
         }
 
         // DELETE: api/Clients/5
