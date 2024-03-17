@@ -53,7 +53,6 @@ public class AuthenticationController(VestaContext context) : ControllerBase
     {
         var user = await context.Users
             .Include(u => u.Employee)
-            .Include(e => e.Role)
             .FirstOrDefaultAsync(u => u.Username == request.Username);
 
         if (user == null || !VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordKey))

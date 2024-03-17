@@ -90,15 +90,9 @@ public partial class VestaContext : DbContext
             entity.ToTable("Employee");
 
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.Adress).HasColumnName("adress");
-            entity.Property(e => e.BirhtDate)
-                .HasColumnType("timestamp(3) without time zone")
-                .HasColumnName("birhtDate");
             entity.Property(e => e.FirstName).HasColumnName("firstName");
-            entity.Property(e => e.Gender).HasColumnName("gender");
             entity.Property(e => e.LastName).HasColumnName("lastName");
             entity.Property(e => e.Patronymic).HasColumnName("patronymic");
-            entity.Property(e => e.Phone).HasColumnName("phone");
         });
 
         modelBuilder.Entity<Adult>(entity =>
@@ -155,7 +149,7 @@ public partial class VestaContext : DbContext
             entity.Property(e => e.TestingDate)
                 .HasColumnType("timestamp(3) without time zone")
                 .HasColumnName("testingDate");
-            entity.Property(e => e.Url).HasColumnName("url");
+            entity.Property(e => e.Answers).HasColumnName("url");
 
             entity.HasOne(d => d.Client).WithMany(p => p.Tests)
                 .HasForeignKey(d => d.ClientId)
