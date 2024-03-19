@@ -63,6 +63,7 @@ namespace vesta_api.Controllers
                 .Include(c => c.AdultsOfClient)!
                 .ThenInclude(a => a.Adult)
                 .Include(c => c.Notes)
+                .Include(c => c.Tests)
                 .FirstOrDefaultAsync(c => c.Id == id);
 
             if (client == null)

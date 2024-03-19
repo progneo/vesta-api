@@ -149,7 +149,7 @@ public partial class VestaContext : DbContext
             entity.Property(e => e.TestingDate)
                 .HasColumnType("timestamp(3) without time zone")
                 .HasColumnName("testingDate");
-            entity.Property(e => e.Answers).HasColumnName("url");
+            entity.Property(e => e.Answers).HasColumnName("answers");
 
             entity.HasOne(d => d.Client).WithMany(p => p.Tests)
                 .HasForeignKey(d => d.ClientId)
