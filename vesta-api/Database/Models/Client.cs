@@ -10,19 +10,22 @@ public partial class Client
 
     public string Patronymic { get; set; } = null!;
 
-    public string Gender { get; set; } = null!;
+    public string Sex { get; set; } = null!;
 
     public DateTime BirthDate { get; set; }
 
     public string Address { get; set; } = null!;
 
-    public string IdentityDocument { get; set; } = null!;
+    public int DocumentId { get; set; }
 
     public virtual ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
 
+    public virtual Document Document { get; set; } = null!;
+
     public virtual ICollection<Note> Notes { get; set; } = new List<Note>();
 
-    public virtual ICollection<Test> Tests { get; set; } = new List<Test>();
+    public virtual ICollection<Testing> Testings { get; set; } = new List<Testing>();
 
-    public virtual ICollection<AdultOfClient>? AdultsOfClient { get; set; } = new List<AdultOfClient>();
+    public virtual ICollection<ResponsibleForClient>? ResponsibleForClient { get; set; } =
+        new List<ResponsibleForClient>();
 }

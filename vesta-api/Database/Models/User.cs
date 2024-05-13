@@ -6,13 +6,13 @@ public partial class User
 
     public string Username { get; set; } = null!;
 
-    public byte[] PasswordKey { get; set; } = null!;
+    public string Role { get; set; } = null!;
+
+    public bool IsActive { get; set; }
 
     public byte[] PasswordHash { get; set; } = null!;
 
-    public string Role { get; set; }
-
-    public bool IsActive { get; set; }
+    public byte[] PasswordKey { get; set; } = null!;
 
     public int EmployeeId { get; set; }
 

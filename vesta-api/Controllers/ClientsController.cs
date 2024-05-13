@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using vesta_api.Database.Context;
 using vesta_api.Database.Models;
+using vesta_api.Database.Models.View;
 
 namespace vesta_api.Controllers
 {
@@ -15,7 +16,7 @@ namespace vesta_api.Controllers
         // GET: api/Clients
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [HttpGet, Authorize(Roles = "clientSpecialist, admin")]
+        [HttpGet, Authorize(Roles = "clientSpecialist,admin")]
         public async Task<ActionResult<IEnumerable<Client>>> GetClients(
             [FromQuery(Name = "firstName")] string? firstName,
             [FromQuery(Name = "lastName")] string? lastName,
@@ -56,29 +57,23 @@ namespace vesta_api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [HttpGet("{id}"), Authorize(Roles = "clientSpecialist, admin")]
+        [HttpGet("{id}"), Authorize(Roles = "clientSpecialist,admin")]
         public async Task<ActionResult<Client>> GetClient(int id)
         {
             var client = await context.Clients
-                .Include(c => c.AdultsOfClient)!
-                .ThenInclude(a => a.Adult)
+                .Include(c => c.ResponsibleForClient)!
+                .ThenInclude(a => a.Responsible)
                 .Include(c => c.Notes)
-                .Include(c => c.Tests)
+                .Include(c => c.Testings)
                 .FirstOrDefaultAsync(c => c.Id == id);
 
-            if (client == null)
-            {
-                return NotFound();
-            }
-
-            return client;
+            return client == null ? NotFound() : client;
         }
 
         // PUT: api/Clients/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [HttpPut("{id}"), Authorize(Roles = "clientSpecialist, admin")]
+        [HttpPut("{id}"), Authorize(Roles = "clientSpecialist,admin")]
         public async Task<IActionResult> PutClient(int id, Client client)
         {
             if (id != client.Id)
@@ -98,20 +93,17 @@ namespace vesta_api.Controllers
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+
+                throw;
             }
 
             return NoContent();
         }
 
         // POST: api/Clients
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [HttpPost, Authorize(Roles = "clientSpecialist, admin")]
+        [HttpPost, Authorize(Roles = "clientSpecialist,admin")]
         public async Task<ActionResult<Client>> PostClient(ClientViewModel client)
         {
             var newClient = context.Clients.Add(new Client()
@@ -119,10 +111,9 @@ namespace vesta_api.Controllers
                 FirstName = client.FirstName,
                 LastName = client.LastName,
                 Patronymic = client.Patronymic,
-                Gender = client.Gender,
+                Sex = client.Sex,
                 BirthDate = client.BirthDate,
-                Address = client.Address,
-                IdentityDocument = client.IdentityDocument,
+                Address = client.Address
             });
             await context.SaveChangesAsync();
 
@@ -132,7 +123,7 @@ namespace vesta_api.Controllers
         // DELETE: api/Clients/5
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [HttpDelete("{id}"), Authorize(Roles = "clientSpecialist, admin")]
+        [HttpDelete("{id}"), Authorize(Roles = "clientSpecialist,admin")]
         public async Task<IActionResult> DeleteClient(int id)
         {
             var client = await context.Clients.FindAsync(id);

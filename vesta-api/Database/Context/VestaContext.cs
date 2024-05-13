@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using vesta_api.Database.Models;
 
 namespace vesta_api.Database.Context;
@@ -20,17 +20,27 @@ public partial class VestaContext : DbContext
 
     public virtual DbSet<Client> Clients { get; set; }
 
+    public virtual DbSet<Document> Documents { get; set; }
+
     public virtual DbSet<Employee> Employees { get; set; }
-
-    public virtual DbSet<Adult> Adults { get; set; }
-
-    public virtual DbSet<AdultOfClient> AdultsOfClient { get; set; }
 
     public virtual DbSet<Note> Notes { get; set; }
 
+    public virtual DbSet<Responsible> Responsibles { get; set; }
+
+    public virtual DbSet<ResponsibleForClient> ResponsibleForClients { get; set; }
+
     public virtual DbSet<Service> Services { get; set; }
 
-    public virtual DbSet<Test> Tests { get; set; }
+    public virtual DbSet<TestAnswerOfClient> TestAnswerOfClients { get; set; }
+
+    public virtual DbSet<TestQuestion> TestQuestions { get; set; }
+
+    public virtual DbSet<TestQuestionAnswer> TestQuestionAnswers { get; set; }
+
+    public virtual DbSet<TestQuestionCategory> TestQuestionCategories { get; set; }
+
+    public virtual DbSet<Testing> Testings { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
 
@@ -38,164 +48,345 @@ public partial class VestaContext : DbContext
     {
         modelBuilder.Entity<Appointment>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("Appointment_pkey");
+            entity.HasKey(e => e.Id).HasName("appointment_pk");
 
-            entity.ToTable("Appointment");
+            entity.ToTable("appointment");
 
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.ClientId).HasColumnName("clientId");
-            entity.Property(e => e.DateTime)
-                .HasColumnType("timestamp(3) without time zone")
-                .HasColumnName("dateTime");
-            entity.Property(e => e.EmployeeId).HasColumnName("employeeId");
-            entity.Property(e => e.Serviceid).HasColumnName("serviceid");
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
+            entity.Property(e => e.ClientId).HasColumnName("client_id");
+            entity.Property(e => e.Datetime)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("datetime");
+            entity.Property(e => e.EmployeeId).HasColumnName("employee_id");
+            entity.Property(e => e.ServiceId).HasColumnName("service_id");
 
             entity.HasOne(d => d.Client).WithMany(p => p.Appointments)
                 .HasForeignKey(d => d.ClientId)
-                .OnDelete(DeleteBehavior.Restrict)
-                .HasConstraintName("Appointment_clientId_fkey");
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("appointment_client_id_fk");
 
             entity.HasOne(d => d.Employee).WithMany(p => p.Appointments)
                 .HasForeignKey(d => d.EmployeeId)
-                .OnDelete(DeleteBehavior.Restrict)
-                .HasConstraintName("Appointment_employeeId_fkey");
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("appointment_employee_id_fk");
 
             entity.HasOne(d => d.Service).WithMany(p => p.Appointments)
-                .HasForeignKey(d => d.Serviceid)
-                .HasConstraintName("appointment_serviceid__fk");
+                .HasForeignKey(d => d.ServiceId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("appointment_service_id_fk");
         });
 
         modelBuilder.Entity<Client>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("Client_pkey");
+            entity.HasKey(e => e.Id).HasName("client_pk");
 
-            entity.ToTable("Client");
+            entity.ToTable("client");
 
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.Address).HasColumnName("address");
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
+            entity.Property(e => e.Address)
+                .HasColumnType("character varying")
+                .HasColumnName("address");
             entity.Property(e => e.BirthDate)
-                .HasColumnType("timestamp(3) without time zone")
-                .HasColumnName("birthDate");
-            entity.Property(e => e.FirstName).HasColumnName("firstName");
-            entity.Property(e => e.Gender).HasColumnName("gender");
-            entity.Property(e => e.IdentityDocument).HasColumnName("identityDocument");
-            entity.Property(e => e.LastName).HasColumnName("lastName");
-            entity.Property(e => e.Patronymic).HasColumnName("patronymic");
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("birth_date");
+            entity.Property(e => e.DocumentId).HasColumnName("document_id");
+            entity.Property(e => e.FirstName)
+                .HasColumnType("character varying")
+                .HasColumnName("first_name");
+            entity.Property(e => e.LastName)
+                .HasColumnType("character varying")
+                .HasColumnName("last_name");
+            entity.Property(e => e.Patronymic)
+                .HasColumnType("character varying")
+                .HasColumnName("patronymic");
+            entity.Property(e => e.Sex)
+                .HasColumnType("character varying")
+                .HasColumnName("sex");
+
+            entity.HasOne(d => d.Document).WithMany(p => p.Clients)
+                .HasForeignKey(d => d.DocumentId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("client_document_id_fk");
+        });
+
+        modelBuilder.Entity<Document>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("document_pk");
+
+            entity.ToTable("document");
+
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
+            entity.Property(e => e.Number)
+                .HasColumnType("character varying")
+                .HasColumnName("number");
+            entity.Property(e => e.Series)
+                .HasColumnType("character varying")
+                .HasColumnName("series");
+            entity.Property(e => e.Type)
+                .HasColumnType("character varying")
+                .HasColumnName("type");
         });
 
         modelBuilder.Entity<Employee>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("Employee_pkey");
+            entity.HasKey(e => e.Id).HasName("table_name_pk");
 
-            entity.ToTable("Employee");
+            entity.ToTable("employee");
 
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.FirstName).HasColumnName("firstName");
-            entity.Property(e => e.LastName).HasColumnName("lastName");
-            entity.Property(e => e.Patronymic).HasColumnName("patronymic");
-        });
-
-        modelBuilder.Entity<Adult>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("Adult_pkey");
-
-            entity.ToTable("Adult");
-
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.FirstName).HasColumnName("firstName");
-            entity.Property(e => e.IdentityDocument).HasColumnName("identityDocument");
-            entity.Property(e => e.LastName).HasColumnName("lastName");
-            entity.Property(e => e.Patronymic).HasColumnName("patronymic");
-            entity.Property(e => e.Phone).HasColumnName("phone");
-            entity.Property(e => e.Phone).HasColumnName("phone");
-            entity.Property(e => e.Type).HasColumnName("type");
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
+            entity.Property(e => e.FirstName)
+                .HasColumnType("character varying")
+                .HasColumnName("first_name");
+            entity.Property(e => e.LastName)
+                .HasColumnType("character varying")
+                .HasColumnName("last_name");
+            entity.Property(e => e.Patronymic)
+                .HasColumnType("character varying")
+                .HasColumnName("patronymic");
         });
 
         modelBuilder.Entity<Note>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("Note_pkey");
+            entity.HasKey(e => e.Id).HasName("note_pk");
 
-            entity.ToTable("Note");
+            entity.ToTable("note");
 
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.ClientId).HasColumnName("clientId");
-            entity.Property(e => e.Text).HasColumnName("text");
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
+            entity.Property(e => e.ClientId).HasColumnName("client_id");
+            entity.Property(e => e.IsActive)
+                .HasDefaultValue(true)
+                .HasColumnName("is_active");
+            entity.Property(e => e.Text)
+                .HasColumnType("character varying")
+                .HasColumnName("text");
 
             entity.HasOne(d => d.Client).WithMany(p => p.Notes)
                 .HasForeignKey(d => d.ClientId)
-                .OnDelete(DeleteBehavior.Restrict)
-                .HasConstraintName("Note_clientId_fkey");
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("note_client_id_fk");
+        });
+
+        modelBuilder.Entity<Responsible>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("adult_pk");
+
+            entity.ToTable("responsible");
+
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
+            entity.Property(e => e.DocumentId).HasColumnName("document_id");
+            entity.Property(e => e.FirstName)
+                .HasColumnType("character varying")
+                .HasColumnName("first_name");
+            entity.Property(e => e.LastName)
+                .HasColumnType("character varying")
+                .HasColumnName("last_name");
+            entity.Property(e => e.Patronymic)
+                .HasColumnType("character varying")
+                .HasColumnName("patronymic");
+            entity.Property(e => e.PhoneNumber)
+                .HasColumnType("character varying")
+                .HasColumnName("phone_number");
+            entity.Property(e => e.Type)
+                .HasColumnType("character varying")
+                .HasColumnName("type");
+
+            entity.HasOne(d => d.Document).WithMany(p => p.Responsibles)
+                .HasForeignKey(d => d.DocumentId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("responsible_document_id_fk");
+        });
+
+        modelBuilder.Entity<ResponsibleForClient>(entity =>
+        {
+            entity.ToTable("responsible_for_client");
+
+            entity.Property(e => e.ClientId).HasColumnName("client_id");
+            entity.Property(e => e.ResponsibleId).HasColumnName("responsible_id");
+
+            entity.HasKey(e => new { e.ClientId, e.ResponsibleId });
+
+            entity
+                .HasOne(e => e.Client)
+                .WithMany(e => e.ResponsibleForClient)
+                .HasForeignKey(e => e.ClientId)
+                .HasConstraintName("client_id");
         });
 
         modelBuilder.Entity<Service>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("service_pk");
 
-            entity.ToTable("Service");
+            entity.ToTable("service");
 
-            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
             entity.Property(e => e.Duration).HasColumnName("duration");
-            entity.Property(e => e.Name).HasColumnName("name");
+            entity.Property(e => e.IsActive)
+                .HasDefaultValue(true)
+                .HasColumnName("is_active");
+            entity.Property(e => e.Name)
+                .HasColumnType("character varying")
+                .HasColumnName("name");
         });
 
-        modelBuilder.Entity<Test>(entity =>
+        modelBuilder.Entity<TestAnswerOfClient>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("Test_pkey");
+            entity.HasKey(e => e.Id).HasName("test_answer_of_client_pk");
 
-            entity.ToTable("Test");
+            entity.ToTable("test_answer_of_client");
 
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.ClientId).HasColumnName("clientId");
-            entity.Property(e => e.TestingDate)
-                .HasColumnType("timestamp(3) without time zone")
-                .HasColumnName("testingDate");
-            entity.Property(e => e.Answers).HasColumnName("answers");
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
+            entity.Property(e => e.AnswerId).HasColumnName("answer_id");
+            entity.Property(e => e.QuestionId).HasColumnName("question_id");
+            entity.Property(e => e.TestingId).HasColumnName("testing_id");
 
-            entity.HasOne(d => d.Client).WithMany(p => p.Tests)
+            entity.HasOne(d => d.Answer).WithMany(p => p.TestAnswerOfClients)
+                .HasForeignKey(d => d.AnswerId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("test_answer_of_client_test_question_answer_id_fk");
+
+            entity.HasOne(d => d.Question).WithMany(p => p.TestAnswerOfClients)
+                .HasForeignKey(d => d.QuestionId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("test_answer_of_client_test_question_id_fk");
+
+            entity.HasOne(d => d.Testing).WithMany(p => p.TestAnswerOfClients)
+                .HasForeignKey(d => d.TestingId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("test_answer_of_client_testing_id_fk");
+        });
+
+        modelBuilder.Entity<TestQuestion>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("test_question_pk");
+
+            entity.ToTable("test_question");
+
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
+            entity.Property(e => e.CategoryId).HasColumnName("category_id");
+            entity.Property(e => e.IsActive)
+                .HasDefaultValue(true)
+                .HasColumnName("is_active");
+            entity.Property(e => e.IsMultipleChoice)
+                .HasDefaultValue(false)
+                .HasColumnName("is_multiple_choice");
+            entity.Property(e => e.Text)
+                .HasColumnType("character varying")
+                .HasColumnName("text");
+
+            entity.HasOne(d => d.Category).WithMany(p => p.TestQuestions)
+                .HasForeignKey(d => d.CategoryId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("test_question_test_question_category_id_fk");
+        });
+
+        modelBuilder.Entity<TestQuestionAnswer>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("test_question_answer_pk");
+
+            entity.ToTable("test_question_answer");
+
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
+            entity.Property(e => e.IsActive)
+                .HasDefaultValue(true)
+                .HasColumnName("is_active");
+            entity.Property(e => e.QuestionId).HasColumnName("question_id");
+            entity.Property(e => e.Score).HasColumnName("score");
+            entity.Property(e => e.Text).HasColumnName("text");
+
+            entity.HasOne(d => d.Question).WithMany(p => p.TestQuestionAnswers)
+                .HasForeignKey(d => d.QuestionId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("test_question_answer_test_question_id_fk");
+        });
+
+        modelBuilder.Entity<TestQuestionCategory>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("test_question_category_pk");
+
+            entity.ToTable("test_question_category");
+
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
+            entity.Property(e => e.IsActive)
+                .HasDefaultValue(true)
+                .HasColumnName("is_active");
+            entity.Property(e => e.Name)
+                .HasColumnType("character varying")
+                .HasColumnName("name");
+        });
+
+        modelBuilder.Entity<Testing>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("testing_pk");
+
+            entity.ToTable("testing");
+
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
+            entity.Property(e => e.ClientId).HasColumnName("client_id");
+            entity.Property(e => e.Datetime)
+                .HasDefaultValue(DateTime.Now)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("datetime");
+
+            entity.HasOne(d => d.Client).WithMany(p => p.Testings)
                 .HasForeignKey(d => d.ClientId)
-                .OnDelete(DeleteBehavior.Restrict)
-                .HasConstraintName("Test_clientId_fkey");
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("testing_client_id_fk");
         });
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("User_pkey");
+            entity.HasKey(e => e.Id).HasName("user_pk");
 
-            entity.ToTable("User");
+            entity.ToTable("user");
 
-            entity.HasIndex(e => e.Username, "User_username_key").IsUnique();
-
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.EmployeeId).HasColumnName("employeeId");
-            entity.Property(e => e.Role).HasColumnName("role");
-            entity.Property(e => e.IsActive).HasColumnName("isActive");
-            entity.Property(e => e.PasswordHash).HasColumnName("passwordHash");
-            entity.Property(e => e.PasswordKey).HasColumnName("passwordKey");
-            entity.Property(e => e.Username).HasColumnName("username");
+            entity.Property(e => e.Id)
+                .UseIdentityAlwaysColumn()
+                .HasColumnName("id");
+            entity.Property(e => e.EmployeeId).HasColumnName("employee_id");
+            entity.Property(e => e.IsActive)
+                .HasDefaultValue(true)
+                .HasColumnName("is_active");
+            entity.Property(e => e.PasswordHash).HasColumnName("password_hash");
+            entity.Property(e => e.PasswordKey).HasColumnName("password_key");
+            entity.Property(e => e.Role)
+                .HasColumnType("character varying")
+                .HasColumnName("role");
+            entity.Property(e => e.Username)
+                .HasColumnType("character varying")
+                .HasColumnName("username");
 
             entity.HasOne(d => d.Employee).WithMany(p => p.Users)
                 .HasForeignKey(d => d.EmployeeId)
-                .OnDelete(DeleteBehavior.Restrict)
-                .HasConstraintName("User_employeeId_fkey");
-        });
-
-        modelBuilder.Entity<AdultOfClient>(entity =>
-        {
-            entity.ToTable("AdultOfClient");
-
-            entity.HasKey(e => new { e.ClientId, e.AdultId });
-
-            entity
-                .HasOne(e => e.Client)
-                .WithMany(e => e.AdultsOfClient)
-                .HasForeignKey(e => e.ClientId)
-                .HasConstraintName("client_id");
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("user_employee_id_fk");
         });
 
         OnModelCreatingPartial(modelBuilder);
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
-
-    public DbSet<vesta_api.Database.Models.AdultOfClient> AdultOfClient { get; set; } = default!;
 }

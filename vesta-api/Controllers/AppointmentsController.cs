@@ -15,7 +15,7 @@ namespace vesta_api.Controllers
         // GET: api/Appointments
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [HttpGet, Authorize(Roles = "clientSpecialist, admin")]
+        [HttpGet, Authorize(Roles = "clientSpecialist,admin")]
         public async Task<ActionResult<IEnumerable<Appointment>>> GetAppointments()
         {
             return await context.Appointments.ToListAsync();
@@ -25,7 +25,7 @@ namespace vesta_api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [HttpGet("{id}"), Authorize(Roles = "clientSpecialist, admin")]
+        [HttpGet("{id}"), Authorize(Roles = "clientSpecialist,admin")]
         public async Task<ActionResult<Appointment>> GetAppointment(int id)
         {
             var appointment = await context.Appointments.FindAsync(id);
@@ -42,17 +42,16 @@ namespace vesta_api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [HttpGet("Client/{id}"), Authorize(Roles = "clientSpecialist, admin")]
+        [HttpGet("Client/{id}"), Authorize(Roles = "clientSpecialist,admin")]
         public async Task<ActionResult<IEnumerable<Appointment>>> GetAppointmentByClientId(int id)
         {
             return await context.Appointments.Where(a => a.ClientId == id).Include(a => a.Service).ToListAsync();
         }
 
         // PUT: api/Appointments/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [HttpPut("{id}"), Authorize(Roles = "clientSpecialist, admin")]
+        [HttpPut("{id}"), Authorize(Roles = "clientSpecialist,admin")]
         public async Task<IActionResult> PutAppointment(int id, Appointment appointment)
         {
             if (id != appointment.Id)
@@ -82,10 +81,9 @@ namespace vesta_api.Controllers
         }
 
         // POST: api/Appointments
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [HttpPost, Authorize(Roles = "clientSpecialist, admin")]
+        [HttpPost, Authorize(Roles = "clientSpecialist,admin")]
         public async Task<ActionResult<Appointment>> PostAppointment(Appointment appointment)
         {
             context.Appointments.Add(appointment);
@@ -97,7 +95,7 @@ namespace vesta_api.Controllers
         // DELETE: api/Appointments/5
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [HttpDelete("{id}"), Authorize(Roles = "clientSpecialist, admin")]
+        [HttpDelete("{id}"), Authorize(Roles = "clientSpecialist,admin")]
         public async Task<IActionResult> DeleteAppointment(int id)
         {
             var appointment = await context.Appointments.FindAsync(id);

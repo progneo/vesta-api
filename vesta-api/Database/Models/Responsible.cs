@@ -1,6 +1,6 @@
 ﻿namespace vesta_api.Database.Models;
 
-public partial class Adult
+public partial class Responsible
 {
     public int Id { get; set; }
 
@@ -10,9 +10,11 @@ public partial class Adult
 
     public string Patronymic { get; set; } = null!;
 
-    public string Phone { get; set; } = null!;
-
-    public string IdentityDocument { get; set; } = null!;
-
     public string Type { get; set; } = null!;
+
+    public string PhoneNumber { get; set; } = null!;
+
+    public int DocumentId { get; set; }
+
+    public virtual Document Document { get; set; } = null!;
 }

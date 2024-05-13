@@ -6,6 +6,8 @@ public partial class Note
 
     public string Text { get; set; } = null!;
 
+    public bool IsActive { get; set; }
+
     public int ClientId { get; set; }
 
     public virtual Client Client { get; set; } = null!;

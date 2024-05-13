@@ -39,7 +39,6 @@ namespace vesta_api.Controllers
         }
 
         // PUT: api/Employees/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpPut("{id}"), Authorize(Roles = "admin")]
@@ -72,7 +71,6 @@ namespace vesta_api.Controllers
         }
 
         // POST: api/Employees
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpPost, Authorize(Roles = "admin")]

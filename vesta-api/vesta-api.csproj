@@ -36,9 +36,9 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Folder Include="Context\"/>
         <Folder Include="Controllers\"/>
         <Folder Include="Database\"/>
-        <Folder Include="Database\Context\"/>
     </ItemGroup>
 
 </Project>

@@ -15,7 +15,7 @@ namespace vesta_api.Controllers
         // GET: api/Notes
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [HttpGet, Authorize(Roles = "clientSpecialist, admin")]
+        [HttpGet, Authorize(Roles = "clientSpecialist,admin")]
         public async Task<ActionResult<IEnumerable<Note>>> GetNotes()
         {
             return await context.Notes.ToListAsync();
@@ -25,7 +25,7 @@ namespace vesta_api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [HttpGet("{id}"), Authorize(Roles = "clientSpecialist, admin")]
+        [HttpGet("{id}"), Authorize(Roles = "clientSpecialist,admin")]
         public async Task<ActionResult<Note>> GetNote(int id)
         {
             var note = await context.Notes.FindAsync(id);
@@ -39,10 +39,9 @@ namespace vesta_api.Controllers
         }
 
         // PUT: api/Notes/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [HttpPut("{id}"), Authorize(Roles = "clientSpecialist, admin")]
+        [HttpPut("{id}"), Authorize(Roles = "clientSpecialist,admin")]
         public async Task<IActionResult> PutNote(int id, Note note)
         {
             if (id != note.Id)
@@ -72,10 +71,9 @@ namespace vesta_api.Controllers
         }
 
         // POST: api/Notes
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [HttpPost, Authorize(Roles = "clientSpecialist, admin")]
+        [HttpPost, Authorize(Roles = "clientSpecialist,admin")]
         public async Task<ActionResult<Note>> PostNote(Note note)
         {
             context.Notes.Add(note);
@@ -87,7 +85,7 @@ namespace vesta_api.Controllers
         // DELETE: api/Notes/5
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [HttpDelete("{id}"), Authorize(Roles = "clientSpecialist, admin")]
+        [HttpDelete("{id}"), Authorize(Roles = "clientSpecialist,admin")]
         public async Task<IActionResult> DeleteNote(int id)
         {
             var note = await context.Notes.FindAsync(id);

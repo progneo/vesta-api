@@ -1,4 +1,4 @@
-﻿namespace vesta_api.Database.Models;
+﻿namespace vesta_api.Database.Models.View;
 
 public class UserViewModel
 {

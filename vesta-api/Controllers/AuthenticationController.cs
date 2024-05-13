@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using vesta_api.Database.Context;
 using vesta_api.Database.Models;
+using vesta_api.Database.Models.View;
 
 namespace vesta_api.Controllers;
 

@@ -10,25 +10,25 @@ namespace vesta_api.Controllers
     [ApiController]
     [Produces("application/json")]
     [Authorize]
-    public class AdultsController(VestaContext context) : ControllerBase
+    public class ResponsiblesController(VestaContext context) : ControllerBase
     {
-        // GET: api/Adults
+        // GET: api/Responsibles
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [HttpGet, Authorize(Roles = "clientSpecialist, admin")]
-        public async Task<ActionResult<IEnumerable<Adult>>> GetAdults()
+        [HttpGet, Authorize(Roles = "clientSpecialist,admin")]
+        public async Task<ActionResult<IEnumerable<Responsible>>> GetResponsibles()
         {
-            return await context.Adults.ToListAsync();
+            return await context.Responsibles.ToListAsync();
         }
 
-        // GET: api/Adults/5
+        // GET: api/Responsibles/5
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [HttpGet("{id}"), Authorize(Roles = "clientSpecialist, admin")]
-        public async Task<ActionResult<Adult>> GetAdult(int id)
+        [HttpGet("{id}"), Authorize(Roles = "clientSpecialist,admin")]
+        public async Task<ActionResult<Responsible>> GetResponsible(int id)
         {
-            var adult = await context.Adults.FindAsync(id);
+            var adult = await context.Responsibles.FindAsync(id);
 
             if (adult == null)
             {
@@ -38,12 +38,11 @@ namespace vesta_api.Controllers
             return adult;
         }
 
-        // PUT: api/Adults/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // PUT: api/Responsibles/5
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [HttpPut("{id}"), Authorize(Roles = "clientSpecialist, admin")]
-        public async Task<IActionResult> PutAdult(int id, Adult adult)
+        [HttpPut("{id}"), Authorize(Roles = "clientSpecialist,admin")]
+        public async Task<IActionResult> PutResponsible(int id, Responsible adult)
         {
             if (id != adult.Id)
             {
@@ -58,7 +57,7 @@ namespace vesta_api.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!AdultExists(id))
+                if (!ResponsibleExists(id))
                 {
                     return NotFound();
                 }
@@ -71,40 +70,39 @@ namespace vesta_api.Controllers
             return NoContent();
         }
 
-        // POST: api/Adults
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        // POST: api/Responsibles
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [HttpPost, Authorize(Roles = "clientSpecialist, admin")]
-        public async Task<ActionResult<Adult>> PostAdult(Adult adult)
+        [HttpPost, Authorize(Roles = "clientSpecialist,admin")]
+        public async Task<ActionResult<Responsible>> PostResponsible(Responsible adult)
         {
-            context.Adults.Add(adult);
+            context.Responsibles.Add(adult);
             await context.SaveChangesAsync();
 
-            return CreatedAtAction("GetAdult", new { id = adult.Id }, adult);
+            return CreatedAtAction("GetResponsible", new { id = adult.Id }, adult);
         }
 
-        // DELETE: api/Adults/5
+        // DELETE: api/Responsibles/5
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [HttpDelete("{id}"), Authorize(Roles = "clientSpecialist, admin")]
-        public async Task<IActionResult> DeleteAdult(int id)
+        [HttpDelete("{id}"), Authorize(Roles = "clientSpecialist,admin")]
+        public async Task<IActionResult> DeleteResponsible(int id)
         {
-            var adult = await context.Adults.FindAsync(id);
+            var adult = await context.Responsibles.FindAsync(id);
             if (adult == null)
             {
                 return NotFound();
             }
 
-            context.Adults.Remove(adult);
+            context.Responsibles.Remove(adult);
             await context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool AdultExists(int id)
+        private bool ResponsibleExists(int id)
         {
-            return context.Adults.Any(e => e.Id == id);
+            return context.Responsibles.Any(e => e.Id == id);
         }
     }
 }
