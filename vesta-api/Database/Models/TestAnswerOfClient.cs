@@ -6,13 +6,9 @@ public partial class TestAnswerOfClient
 
     public int TestingId { get; set; }
 
-    public int QuestionId { get; set; }
-
     public int AnswerId { get; set; }
 
     public virtual TestQuestionAnswer Answer { get; set; } = null!;
-
-    public virtual TestQuestion Question { get; set; } = null!;
 
     public virtual Testing Testing { get; set; } = null!;
 }

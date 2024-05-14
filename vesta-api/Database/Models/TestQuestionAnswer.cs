@@ -4,7 +4,7 @@ public partial class TestQuestionAnswer
 {
     public int Id { get; set; }
 
-    public int Text { get; set; }
+    public string Text { get; set; } = null!;
 
     public int Score { get; set; }
 

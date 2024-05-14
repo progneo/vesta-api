@@ -14,9 +14,5 @@ public class ClientViewModel
 
     public string Address { get; set; } = null!;
 
-    public string IdentityDocumentType { get; set; } = null!;
-
-    public string IdentityDocumentSerial { get; set; } = null!;
-
-    public string IdentityDocumentNumber { get; set; } = null!;
+    public int DocumentId { get; set; }
 }

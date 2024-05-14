@@ -252,18 +252,12 @@ public partial class VestaContext : DbContext
                 .UseIdentityAlwaysColumn()
                 .HasColumnName("id");
             entity.Property(e => e.AnswerId).HasColumnName("answer_id");
-            entity.Property(e => e.QuestionId).HasColumnName("question_id");
             entity.Property(e => e.TestingId).HasColumnName("testing_id");
 
             entity.HasOne(d => d.Answer).WithMany(p => p.TestAnswerOfClients)
                 .HasForeignKey(d => d.AnswerId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("test_answer_of_client_test_question_answer_id_fk");
-
-            entity.HasOne(d => d.Question).WithMany(p => p.TestAnswerOfClients)
-                .HasForeignKey(d => d.QuestionId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("test_answer_of_client_test_question_id_fk");
 
             entity.HasOne(d => d.Testing).WithMany(p => p.TestAnswerOfClients)
                 .HasForeignKey(d => d.TestingId)

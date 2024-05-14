@@ -113,7 +113,8 @@ namespace vesta_api.Controllers
                 Patronymic = client.Patronymic,
                 Sex = client.Sex,
                 BirthDate = client.BirthDate,
-                Address = client.Address
+                Address = client.Address,
+                DocumentId = client.DocumentId
             });
             await context.SaveChangesAsync();
 

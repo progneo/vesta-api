@@ -7,7 +7,7 @@ namespace vesta_api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ResponsiblesOfClientController(VestaContext context) : ControllerBase
+    public class ResponsiblesForClientController(VestaContext context) : ControllerBase
     {
         // GET: api/ResponsiblesOfClientController
         [HttpGet]

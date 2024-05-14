@@ -13,6 +13,20 @@ namespace vesta_api.Controllers
     [Authorize]
     public class TestingController(VestaContext context) : ControllerBase
     {
+        [HttpGet("new"), Authorize(Roles = "clientSpecialist,admin")]
+        public async Task<ActionResult<IEnumerable<TestQuestionCategory>>> GetTestingQuestions()
+        {
+            return await context.TestQuestionCategories
+                .Where(c => c.IsActive)
+                .Include(c => c.TestQuestions
+                    .Where(q => q.IsActive)
+                )
+                .ThenInclude(q => q.TestQuestionAnswers.Where(
+                    a => a.IsActive)
+                )
+                .ToListAsync();
+        }
+
         // GET: api/Testing
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -72,19 +86,29 @@ namespace vesta_api.Controllers
         }
 
         // POST: api/Testing
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpPost, Authorize(Roles = "clientSpecialist,admin")]
         public async Task<ActionResult<Testing>> PostTesting(TestingViewModel test)
         {
-            var newTesting = context.Testings.Add(new Testing()
+            var newTesting = context.Testings.Add(new Testing
             {
                 ClientId = test.ClientId,
             });
             await context.SaveChangesAsync();
 
+            foreach (var answer in test.AnswerIds)
+            {
+                context.TestAnswerOfClients.Add(new TestAnswerOfClient
+                {
+                    TestingId = newTesting.Entity.Id,
+                    AnswerId = answer
+                });
+            }
+
+            await context.SaveChangesAsync();
+
             return CreatedAtAction("GetTesting", new { id = newTesting.Entity.Id }, newTesting.Entity);
         }
+
 
         // DELETE: api/Testing/5
         [ProducesResponseType(StatusCodes.Status200OK)]
