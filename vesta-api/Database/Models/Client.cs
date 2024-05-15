@@ -17,6 +17,8 @@ public partial class Client
     public string Address { get; set; } = null!;
 
     public int DocumentId { get; set; }
+    
+    public bool IsActive { get; set; }
 
     public virtual ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
 
@@ -26,6 +28,6 @@ public partial class Client
 
     public virtual ICollection<Testing> Testings { get; set; } = new List<Testing>();
 
-    public virtual ICollection<ResponsibleForClient>? ResponsibleForClient { get; set; } =
+    public virtual ICollection<ResponsibleForClient>? ResponsiblesForClient { get; set; } =
         new List<ResponsibleForClient>();
 }

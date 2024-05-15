@@ -12,19 +12,20 @@ namespace vesta_api.Controllers
     [Authorize]
     public class EmployeesController(VestaContext context) : ControllerBase
     {
-        // GET: api/Employees
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpGet, Authorize(Roles = "admin")]
         public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees()
         {
             return await context.Employees.ToListAsync();
         }
 
-        // GET: api/Employees/5
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [HttpGet("specialists"), Authorize(Roles = "admin,clientSpecialist")]
+        public async Task<ActionResult<IEnumerable<Employee>>> GetSpecialists()
+        {
+            return await context.Employees
+                .Where(e => context.Users.Any(u => u.EmployeeId == e.Id && u.Role == "specialist"))
+                .ToListAsync();
+        }
+
         [HttpGet("{id}"), Authorize(Roles = "admin")]
         public async Task<ActionResult<Employee>> GetEmployee(int id)
         {
@@ -38,9 +39,6 @@ namespace vesta_api.Controllers
             return employee;
         }
 
-        // PUT: api/Employees/5
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpPut("{id}"), Authorize(Roles = "admin")]
         public async Task<IActionResult> PutEmployee(int id, Employee employee)
         {
@@ -61,18 +59,13 @@ namespace vesta_api.Controllers
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+
+                throw;
             }
 
             return NoContent();
         }
 
-        // POST: api/Employees
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpPost, Authorize(Roles = "admin")]
         public async Task<ActionResult<Employee>> PostEmployee(Employee employee)
         {
@@ -82,9 +75,6 @@ namespace vesta_api.Controllers
             return CreatedAtAction("GetEmployee", new { id = employee.Id }, employee);
         }
 
-        // DELETE: api/Employees/5
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpDelete("{id}"), Authorize(Roles = "admin")]
         public async Task<IActionResult> DeleteEmployee(int id)
         {

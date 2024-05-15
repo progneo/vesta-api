@@ -106,6 +106,10 @@ public partial class VestaContext : DbContext
             entity.Property(e => e.Sex)
                 .HasColumnType("character varying")
                 .HasColumnName("sex");
+            entity.Property(e => e.IsActive)
+                .HasDefaultValue(true)
+                .HasColumnType("boolean")
+                .HasColumnName("is_active");
 
             entity.HasOne(d => d.Document).WithMany(p => p.Clients)
                 .HasForeignKey(d => d.DocumentId)
@@ -219,7 +223,7 @@ public partial class VestaContext : DbContext
 
             entity
                 .HasOne(e => e.Client)
-                .WithMany(e => e.ResponsibleForClient)
+                .WithMany(e => e.ResponsiblesForClient)
                 .HasForeignKey(e => e.ClientId)
                 .HasConstraintName("client_id");
         });

@@ -14,7 +14,5 @@ public partial class TestQuestion
 
     public virtual TestQuestionCategory Category { get; set; } = null!;
 
-    public virtual ICollection<TestAnswerOfClient> TestAnswerOfClients { get; set; } = new List<TestAnswerOfClient>();
-
     public virtual ICollection<TestQuestionAnswer> TestQuestionAnswers { get; set; } = new List<TestQuestionAnswer>();
 }

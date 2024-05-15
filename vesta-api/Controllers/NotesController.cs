@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using vesta_api.Database.Context;
 using vesta_api.Database.Models;
+using vesta_api.Database.Models.View;
 
 namespace vesta_api.Controllers
 {
@@ -12,36 +13,13 @@ namespace vesta_api.Controllers
     [Authorize]
     public class NotesController(VestaContext context) : ControllerBase
     {
-        // GET: api/Notes
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [HttpGet, Authorize(Roles = "clientSpecialist,admin")]
+        [HttpGet, Authorize]
         public async Task<ActionResult<IEnumerable<Note>>> GetNotes()
         {
-            return await context.Notes.ToListAsync();
+            return await context.Notes.Where(n => n.IsActive == true).ToListAsync();
         }
 
-        // GET: api/Notes/5
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [HttpGet("{id}"), Authorize(Roles = "clientSpecialist,admin")]
-        public async Task<ActionResult<Note>> GetNote(int id)
-        {
-            var note = await context.Notes.FindAsync(id);
-
-            if (note == null)
-            {
-                return NotFound();
-            }
-
-            return note;
-        }
-
-        // PUT: api/Notes/5
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [HttpPut("{id}"), Authorize(Roles = "clientSpecialist,admin")]
+        [HttpPut("{id}"), Authorize]
         public async Task<IActionResult> PutNote(int id, Note note)
         {
             if (id != note.Id)
@@ -61,31 +39,30 @@ namespace vesta_api.Controllers
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+
+                throw;
             }
 
             return NoContent();
         }
 
-        // POST: api/Notes
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [HttpPost, Authorize(Roles = "clientSpecialist,admin")]
-        public async Task<ActionResult<Note>> PostNote(Note note)
+        [HttpPost, Authorize]
+        public async Task<ActionResult<Note>> PostNote(NoteViewModel note)
         {
-            context.Notes.Add(note);
+            var newNote = new Note
+            {
+                Text = note.Text,
+                ClientId = note.ClientId,
+                IsActive = true
+            };
+
+            context.Notes.Add(newNote);
             await context.SaveChangesAsync();
 
-            return CreatedAtAction("GetNote", new { id = note.Id }, note);
+            return Created();
         }
 
-        // DELETE: api/Notes/5
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [HttpDelete("{id}"), Authorize(Roles = "clientSpecialist,admin")]
+        [HttpDelete("{id}"), Authorize]
         public async Task<IActionResult> DeleteNote(int id)
         {
             var note = await context.Notes.FindAsync(id);
@@ -94,7 +71,9 @@ namespace vesta_api.Controllers
                 return NotFound();
             }
 
-            context.Notes.Remove(note);
+            note.IsActive = false;
+
+            context.Entry(note).State = EntityState.Modified;
             await context.SaveChangesAsync();
 
             return NoContent();

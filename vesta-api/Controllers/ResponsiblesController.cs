@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using vesta_api.Database.Context;
 using vesta_api.Database.Models;
+using vesta_api.Database.Models.View;
 
 namespace vesta_api.Controllers
 {
@@ -12,19 +13,12 @@ namespace vesta_api.Controllers
     [Authorize]
     public class ResponsiblesController(VestaContext context) : ControllerBase
     {
-        // GET: api/Responsibles
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpGet, Authorize(Roles = "clientSpecialist,admin")]
         public async Task<ActionResult<IEnumerable<Responsible>>> GetResponsibles()
         {
             return await context.Responsibles.ToListAsync();
         }
 
-        // GET: api/Responsibles/5
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpGet("{id}"), Authorize(Roles = "clientSpecialist,admin")]
         public async Task<ActionResult<Responsible>> GetResponsible(int id)
         {
@@ -38,9 +32,6 @@ namespace vesta_api.Controllers
             return adult;
         }
 
-        // PUT: api/Responsibles/5
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpPut("{id}"), Authorize(Roles = "clientSpecialist,admin")]
         public async Task<IActionResult> PutResponsible(int id, Responsible adult)
         {
@@ -61,30 +52,32 @@ namespace vesta_api.Controllers
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+
+                throw;
             }
 
             return NoContent();
         }
 
-        // POST: api/Responsibles
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpPost, Authorize(Roles = "clientSpecialist,admin")]
-        public async Task<ActionResult<Responsible>> PostResponsible(Responsible adult)
+        public async Task<ActionResult<Responsible>> PostResponsible(ResponsibleViewModel responsible)
         {
-            context.Responsibles.Add(adult);
+            var newResponsible = new Responsible
+            {
+                FirstName = responsible.FirstName,
+                LastName = responsible.LastName,
+                Patronymic = responsible.Patronymic,
+                Type = responsible.Type,
+                PhoneNumber = responsible.PhoneNumber,
+                DocumentId = responsible.DocumentId
+            };
+            
+            context.Responsibles.Add(newResponsible);
             await context.SaveChangesAsync();
 
-            return CreatedAtAction("GetResponsible", new { id = adult.Id }, adult);
+            return CreatedAtAction("GetResponsible", new { id = newResponsible.Id }, newResponsible);
         }
 
-        // DELETE: api/Responsibles/5
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpDelete("{id}"), Authorize(Roles = "clientSpecialist,admin")]
         public async Task<IActionResult> DeleteResponsible(int id)
         {

@@ -1,8 +1,11 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.Elfie.Serialization;
 using Microsoft.EntityFrameworkCore;
 using vesta_api.Database.Context;
 using vesta_api.Database.Models;
+using vesta_api.Database.Models.View;
 
 namespace vesta_api.Controllers
 {
@@ -12,45 +15,64 @@ namespace vesta_api.Controllers
     [Authorize]
     public class AppointmentsController(VestaContext context) : ControllerBase
     {
-        // GET: api/Appointments
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [HttpGet, Authorize(Roles = "clientSpecialist,admin")]
-        public async Task<ActionResult<IEnumerable<Appointment>>> GetAppointments()
+        [HttpGet("{date:datetime}"), Authorize(Roles = "specialist")]
+        public async Task<ActionResult<IEnumerable<Appointment>>> GetAppointmentsByDate(DateTime date)
         {
-            return await context.Appointments.ToListAsync();
+            var username = User.FindFirst(c => c.Type == ClaimsIdentity.DefaultNameClaimType)!.Value;
+            var user = context.Users
+                .Include(u => u.Employee)
+                .First(u => u.Username == username);
+
+            return await context.Appointments
+                .Where(a => a.EmployeeId == user.EmployeeId && a.Datetime.Date == date.Date)
+                .Include(a => a.Client)
+                .Include(a => a.Service)
+                .OrderBy(a => a.Datetime)
+                .ToListAsync();
         }
 
-        // GET: api/Appointments/5
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [HttpGet("{id}"), Authorize(Roles = "clientSpecialist,admin")]
-        public async Task<ActionResult<Appointment>> GetAppointment(int id)
+        [HttpGet, Authorize(Roles = "clientSpecialist,admin")]
+        public async Task<ActionResult<IEnumerable<Appointment>>> GetAppointmentsByEmployeeId(
+            [FromQuery(Name = "employeeId")] string? employeeId,
+            [FromQuery(Name = "date")] string? date)
         {
-            var appointment = await context.Appointments.FindAsync(id);
+            var appointments = await context.Appointments
+                .Include(a => a.Client)
+                .Include(a => a.Service)
+                .OrderBy(a => a.Datetime)
+                .ToListAsync();
 
-            if (appointment == null)
+            if (employeeId != null)
             {
-                return NotFound();
+                var user = context.Users
+                    .Include(u => u.Employee)
+                    .First(u => u.Employee.Id == int.Parse(employeeId));
+
+                appointments = appointments
+                    .Where(a => a.EmployeeId == user.EmployeeId)
+                    .ToList();
             }
 
-            return appointment;
+            if (date != null)
+            {
+                appointments = appointments
+                    .Where(a => a.Datetime.Date.ToString("yyyy-MM-dd").Equals(date))
+                    .ToList();
+            }
+
+            return appointments;
         }
 
-        // GET: api/Appointments/5
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpGet("Client/{id}"), Authorize(Roles = "clientSpecialist,admin")]
         public async Task<ActionResult<IEnumerable<Appointment>>> GetAppointmentByClientId(int id)
         {
-            return await context.Appointments.Where(a => a.ClientId == id).Include(a => a.Service).ToListAsync();
+            return await context.Appointments
+                .Where(a => a.ClientId == id)
+                .Include(a => a.Service)
+                .OrderBy(a => a.Datetime)
+                .ToListAsync();
         }
 
-        // PUT: api/Appointments/5
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpPut("{id}"), Authorize(Roles = "clientSpecialist,admin")]
         public async Task<IActionResult> PutAppointment(int id, Appointment appointment)
         {
@@ -71,30 +93,30 @@ namespace vesta_api.Controllers
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+
+                throw;
             }
 
             return NoContent();
         }
 
-        // POST: api/Appointments
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpPost, Authorize(Roles = "clientSpecialist,admin")]
-        public async Task<ActionResult<Appointment>> PostAppointment(Appointment appointment)
+        public async Task<ActionResult<Appointment>> PostAppointment(AppointmentViewModel appointment)
         {
-            context.Appointments.Add(appointment);
+            var newAppointment = new Appointment
+            {
+                Datetime = appointment.Datetime,
+                ClientId = appointment.ClientId,
+                EmployeeId = appointment.EmployeeId,
+                ServiceId = appointment.ServiceId
+            };
+            
+            context.Appointments.Add(newAppointment);
             await context.SaveChangesAsync();
 
-            return CreatedAtAction("GetAppointment", new { id = appointment.Id }, appointment);
+            return Created();
         }
 
-        // DELETE: api/Appointments/5
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpDelete("{id}"), Authorize(Roles = "clientSpecialist,admin")]
         public async Task<IActionResult> DeleteAppointment(int id)
         {
