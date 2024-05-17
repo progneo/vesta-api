@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using vesta_api.Database.Context;
 using vesta_api.Database.Models;
 using vesta_api.Database.Models.View;
+using vesta_api.Database.Models.View.Requests;
 
 namespace vesta_api.Controllers
 {
@@ -62,6 +63,12 @@ namespace vesta_api.Controllers
         [HttpPost, Authorize(Roles = "clientSpecialist,admin")]
         public async Task<ActionResult<Responsible>> PostResponsible(ResponsibleViewModel responsible)
         {
+            var existingResponsible = await
+                context.Responsibles.FirstOrDefaultAsync(r => r.PhoneNumber == responsible.PhoneNumber);
+
+            if (existingResponsible != null)
+                return CreatedAtAction("GetResponsible", new { id = existingResponsible.Id }, existingResponsible);
+
             var newResponsible = new Responsible
             {
                 FirstName = responsible.FirstName,
@@ -71,7 +78,7 @@ namespace vesta_api.Controllers
                 PhoneNumber = responsible.PhoneNumber,
                 DocumentId = responsible.DocumentId
             };
-            
+
             context.Responsibles.Add(newResponsible);
             await context.SaveChangesAsync();
 

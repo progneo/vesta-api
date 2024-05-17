@@ -1,4 +1,4 @@
-﻿namespace vesta_api.Database.Models.View;
+﻿namespace vesta_api.Database.Models.View.Requests;
 
 public partial class ResponsibleViewModel
 {

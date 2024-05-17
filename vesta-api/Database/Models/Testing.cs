@@ -10,5 +10,5 @@ public partial class Testing
 
     public virtual Client Client { get; set; } = null!;
 
-    public virtual ICollection<TestAnswerOfClient> TestAnswerOfClients { get; set; } = new List<TestAnswerOfClient>();
+    public virtual ICollection<TestAnswerOfClient> TestAnswersOfClient { get; set; } = new List<TestAnswerOfClient>();
 }

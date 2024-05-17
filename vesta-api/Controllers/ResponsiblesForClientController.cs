@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using vesta_api.Database.Context;
 using vesta_api.Database.Models;
 using vesta_api.Database.Models.View;
+using vesta_api.Database.Models.View.Requests;
 
 namespace vesta_api.Controllers
 {

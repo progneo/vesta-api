@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using vesta_api.Database.Context;
 using vesta_api.Database.Models;
 using vesta_api.Database.Models.View;
+using vesta_api.Database.Models.View.Requests;
+using vesta_api.Database.Models.View.Responses;
 
 namespace vesta_api.Controllers
 {
@@ -55,12 +57,22 @@ namespace vesta_api.Controllers
         {
             var client = await context.Clients
                 .Where(c => c.IsActive == true)
-                .Include(c => c.ResponsiblesForClient)!.ThenInclude(r => r.Responsible).ThenInclude(r => r.Document)
-                .Include(c => c.Notes.Where(n => n.IsActive == true))
-                .Include(c => c.Testings)
-                .Include(c => c.Appointments.OrderBy(a => a.Datetime))
-                .Include(c => c.Appointments).ThenInclude(a => a.Employee)
-                .Include(c => c.Appointments).ThenInclude(a => a.Service)
+                .Include(c => c.ResponsiblesForClient)!
+                .ThenInclude(r => r.Responsible)
+                .ThenInclude(r => r.Document)
+                .Include(c => c.Notes
+                    .Where(n => n.IsActive == true)
+                )
+                .Include(c => c.Testings
+                    .OrderByDescending(t => t.Datetime)
+                )
+                .Include(c => c.Appointments
+                    .OrderBy(a => a.Datetime)
+                )
+                .Include(c => c.Appointments)
+                .ThenInclude(a => a.Employee)
+                .Include(c => c.Appointments)
+                .ThenInclude(a => a.Service)
                 .Include(c => c.Document)
                 .FirstOrDefaultAsync(c => c.Id == id);
 

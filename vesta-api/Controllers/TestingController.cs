@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using vesta_api.Database.Context;
 using vesta_api.Database.Models;
 using vesta_api.Database.Models.View;
+using vesta_api.Database.Models.View.Requests;
+using vesta_api.Database.Models.View.Responses;
 
 namespace vesta_api.Controllers
 {
@@ -27,35 +29,78 @@ namespace vesta_api.Controllers
                 .ToListAsync();
         }
 
-        // GET: api/Testing
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpGet, Authorize(Roles = "clientSpecialist,admin")]
         public async Task<ActionResult<IEnumerable<Testing>>> GetTestings()
         {
             return await context.Testings.ToListAsync();
         }
 
-        // GET: api/Testing/5
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [HttpGet("{id}"), Authorize(Roles = "clientSpecialist,admin")]
-        public async Task<ActionResult<Testing>> GetTesting(int id)
+        [HttpGet("scores/{clientId}"), Authorize(Roles = "clientSpecialist,admin")]
+        public async Task<ActionResult<IEnumerable<ScoresByCategoryResponse>>> GetScoresOfTestingsByClientId(
+            int clientId
+        )
         {
-            var test = await context.Testings.FindAsync(id);
+            var testings = await context.Testings
+                .Where(t => t.ClientId == clientId)
+                .Include(t => t.TestAnswersOfClient)
+                .ThenInclude(ta => ta.Answer)
+                .ThenInclude(a => a.Question)
+                .ThenInclude(q => q.Category)
+                .ToListAsync();
+
+            var scores = testings
+                .SelectMany(t => t.TestAnswersOfClient, (t, ta) => new { t.Id, t.Datetime, ta })
+                .GroupBy(ta => ta.ta.Answer.Question.Category.Name)
+                .Select(g => new ScoresByCategoryResponse
+                {
+                    CategoryName = g.Key,
+                    Scores = g.GroupBy(ta => ta.Id)
+                        .Select(tg => new TestingScoreResponse
+                        {
+                            Id = tg.Key,
+                            Score = tg.Sum(ta => ta.ta.Answer.Score),
+                            Datetime = tg.First().Datetime
+                        })
+                        .ToList()
+                });
+
+            return scores.ToList();
+        }
+
+        [HttpGet("{id}"), Authorize(Roles = "clientSpecialist,admin")]
+        public async Task<ActionResult<List<TestingCategoryQuestionsResponse>>> GetTesting(int id)
+        {
+            var test = await context.Testings
+                .Include(t => t.TestAnswersOfClient)
+                .ThenInclude(ta => ta.Answer)
+                .ThenInclude(a => a.Question)
+                .ThenInclude(tq => tq.Category)
+                .FirstOrDefaultAsync(t => t.Id == id);
 
             if (test == null)
             {
                 return NotFound();
             }
 
-            return test;
+            var response = test.TestAnswersOfClient
+                .GroupBy(ta => ta.Answer.Question.Category.Name)
+                .Select(g => new TestingCategoryQuestionsResponse
+                {
+                    Category = g.Key,
+                    QuestionList = g
+                        .GroupBy(ta => ta.Answer.QuestionId)
+                        .Select(qg => new TestingQuestionAnswersResponse
+                        {
+                            Question = qg.First().Answer.Question.Text,
+                            AnswerList = qg.Select(ta => ta.Answer.Text).ToList()
+                        })
+                        .ToList()
+                })
+                .ToList();
+
+            return response;
         }
 
-        // PUT: api/Testing/5
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpPut("{id}"), Authorize(Roles = "clientSpecialist,admin")]
         public async Task<IActionResult> PutTesting(int id, Testing test)
         {
@@ -76,16 +121,13 @@ namespace vesta_api.Controllers
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+
+                throw;
             }
 
             return NoContent();
         }
 
-        // POST: api/Testing
         [HttpPost, Authorize(Roles = "clientSpecialist,admin")]
         public async Task<ActionResult<Testing>> PostTesting(TestingViewModel test)
         {
@@ -109,10 +151,6 @@ namespace vesta_api.Controllers
             return CreatedAtAction("GetTesting", new { id = newTesting.Entity.Id }, newTesting.Entity);
         }
 
-
-        // DELETE: api/Testing/5
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [HttpDelete("{id}"), Authorize(Roles = "clientSpecialist,admin")]
         public async Task<IActionResult> DeleteTesting(int id)
         {

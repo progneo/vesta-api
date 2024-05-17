@@ -263,7 +263,7 @@ public partial class VestaContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("test_answer_of_client_test_question_answer_id_fk");
 
-            entity.HasOne(d => d.Testing).WithMany(p => p.TestAnswerOfClients)
+            entity.HasOne(d => d.Testing).WithMany(p => p.TestAnswersOfClient)
                 .HasForeignKey(d => d.TestingId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("test_answer_of_client_testing_id_fk");
