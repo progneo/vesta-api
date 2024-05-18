@@ -15,12 +15,12 @@ namespace vesta_api.Controllers
     {
         [HttpPost, Authorize(Roles = "admin,clientSpecialist")]
         public async Task<ActionResult<ResponsibleForClient>> PostResponsibleOfClient(
-            ResponsibleForClientViewModel responsibleForClient)
+            CreateResponsibleForClientRequest createResponsibleForClient)
         {
             context.ResponsibleForClients.Add(new ResponsibleForClient
             {
-                ClientId = responsibleForClient.ClientId,
-                ResponsibleId = responsibleForClient.ResponsibleId
+                ClientId = createResponsibleForClient.ClientId,
+                ResponsibleId = createResponsibleForClient.ResponsibleId
             });
             await context.SaveChangesAsync();
 

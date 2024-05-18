@@ -1,6 +1,6 @@
 ﻿namespace vesta_api.Database.Models.View.Requests;
 
-public class NoteViewModel
+public class CreateNoteRequest
 {
     public string Text { get; set; } = null!;
     

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using vesta_api.Database.Context;
 using vesta_api.Database.Models;
+using vesta_api.Database.Models.View.Requests;
 
 namespace vesta_api.Controllers.Admin
 {
@@ -15,27 +16,16 @@ namespace vesta_api.Controllers.Admin
     [ApiController]
     [Produces("application/json")]
     [Authorize(Roles = "admin")]
-    public class TestQuestionsController : ControllerBase
+    public class TestQuestionsController(VestaContext context) : ControllerBase
     {
-        private readonly VestaContext _context;
-
-        public TestQuestionsController(VestaContext context)
-        {
-            _context = context;
-        }
-
-        // GET: api/TestQuestions
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<TestQuestion>>> GetTestQuestions()
-        {
-            return await _context.TestQuestions.ToListAsync();
-        }
-
         // GET: api/TestQuestions/5
         [HttpGet("{id}")]
         public async Task<ActionResult<TestQuestion>> GetTestQuestion(int id)
         {
-            var testQuestion = await _context.TestQuestions.FindAsync(id);
+            var testQuestion =
+                await context.TestQuestions
+                    .Include(question => question.TestQuestionAnswers)
+                    .FirstOrDefaultAsync(question => question.Id == id);
 
             if (testQuestion == null)
             {
@@ -47,18 +37,26 @@ namespace vesta_api.Controllers.Admin
 
         // PUT: api/TestQuestions/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTestQuestion(int id, TestQuestion testQuestion)
+        public async Task<IActionResult> PutTestQuestion(int id, EditTestQuestionRequest testQuestion)
         {
             if (id != testQuestion.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(testQuestion).State = EntityState.Modified;
+            var editingQuestion = await context.TestQuestions.FirstOrDefaultAsync(question => question.Id == id);
+
+            if (editingQuestion == null) return NotFound();
+
+            editingQuestion.Text = testQuestion.Text;
+            editingQuestion.IsMultipleChoice = testQuestion.IsMultipleChoice;
+            editingQuestion.IsActive = testQuestion.IsActive;
+
+            context.Entry(editingQuestion).State = EntityState.Modified;
 
             try
             {
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -66,10 +64,8 @@ namespace vesta_api.Controllers.Admin
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+
+                throw;
             }
 
             return NoContent();
@@ -77,33 +73,25 @@ namespace vesta_api.Controllers.Admin
 
         // POST: api/TestQuestions
         [HttpPost]
-        public async Task<ActionResult<TestQuestion>> PostTestQuestion(TestQuestion testQuestion)
+        public async Task<ActionResult<TestQuestion>> PostTestQuestion(CreateTestQuestionRequest testQuestion)
         {
-            _context.TestQuestions.Add(testQuestion);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetTestQuestion", new { id = testQuestion.Id }, testQuestion);
-        }
-
-        // DELETE: api/TestQuestions/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTestQuestion(int id)
-        {
-            var testQuestion = await _context.TestQuestions.FindAsync(id);
-            if (testQuestion == null)
+            var newQuestion = new TestQuestion
             {
-                return NotFound();
-            }
+                Text = testQuestion.Text,
+                IsMultipleChoice = testQuestion.IsMultipleChoice,
+                IsActive = true,
+                CategoryId = testQuestion.CategoryId,
+            };
 
-            _context.TestQuestions.Remove(testQuestion);
-            await _context.SaveChangesAsync();
+            context.TestQuestions.Add(newQuestion);
+            await context.SaveChangesAsync();
 
-            return NoContent();
+            return CreatedAtAction("GetTestQuestion", new { id = newQuestion.Id }, newQuestion);
         }
 
         private bool TestQuestionExists(int id)
         {
-            return _context.TestQuestions.Any(e => e.Id == id);
+            return context.TestQuestions.Any(e => e.Id == id);
         }
     }
 }

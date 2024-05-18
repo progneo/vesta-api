@@ -65,13 +65,13 @@ namespace vesta_api.Controllers
 
         // POST: api/Documents
         [HttpPost, Authorize(Roles = "clientSpecialist,admin")]
-        public async Task<ActionResult<Document>> PostDocument(DocumentViewModel document)
+        public async Task<ActionResult<Document>> PostDocument(CreateDocumentRequest createDocument)
         {
             var newDocument = new Document()
             {
-                Type = document.Type,
-                Series = document.Series,
-                Number = document.Number
+                Type = createDocument.Type,
+                Series = createDocument.Series,
+                Number = createDocument.Number
             };
 
             context.Documents.Add(newDocument);

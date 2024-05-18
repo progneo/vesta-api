@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using vesta_api.Database.Context;
 using vesta_api.Database.Models;
+using vesta_api.Database.Models.View.Requests;
 
 namespace vesta_api.Controllers.Admin
 {
@@ -15,50 +16,30 @@ namespace vesta_api.Controllers.Admin
     [ApiController]
     [Produces("application/json")]
     [Authorize(Roles = "admin")]
-    public class TestQuestionAnswersController : ControllerBase
+    public class TestQuestionAnswersController(VestaContext context) : ControllerBase
     {
-        private readonly VestaContext _context;
-
-        public TestQuestionAnswersController(VestaContext context)
-        {
-            _context = context;
-        }
-
-        // GET: api/TestQuestionAnswers
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<TestQuestionAnswer>>> GetTestQuestionAnswers()
-        {
-            return await _context.TestQuestionAnswers.ToListAsync();
-        }
-
-        // GET: api/TestQuestionAnswers/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<TestQuestionAnswer>> GetTestQuestionAnswer(int id)
-        {
-            var testQuestionAnswer = await _context.TestQuestionAnswers.FindAsync(id);
-
-            if (testQuestionAnswer == null)
-            {
-                return NotFound();
-            }
-
-            return testQuestionAnswer;
-        }
-
         // PUT: api/TestQuestionAnswers/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTestQuestionAnswer(int id, TestQuestionAnswer testQuestionAnswer)
+        public async Task<IActionResult> PutTestQuestionAnswer(int id, EditTestQuestionAnswerRequest testQuestionAnswer)
         {
             if (id != testQuestionAnswer.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(testQuestionAnswer).State = EntityState.Modified;
+            var editingAnswer = await context.TestQuestionAnswers.FirstOrDefaultAsync(answer => answer.Id == id);
+
+            if (editingAnswer == null) return NotFound();
+
+            editingAnswer.Text = testQuestionAnswer.Text;
+            editingAnswer.Score = testQuestionAnswer.Score;
+            editingAnswer.IsActive = testQuestionAnswer.IsActive;
+
+            context.Entry(editingAnswer).State = EntityState.Modified;
 
             try
             {
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -66,10 +47,8 @@ namespace vesta_api.Controllers.Admin
                 {
                     return NotFound();
                 }
-                else
-                {
-                    throw;
-                }
+
+                throw;
             }
 
             return NoContent();
@@ -77,33 +56,26 @@ namespace vesta_api.Controllers.Admin
 
         // POST: api/TestQuestionAnswers
         [HttpPost]
-        public async Task<ActionResult<TestQuestionAnswer>> PostTestQuestionAnswer(TestQuestionAnswer testQuestionAnswer)
+        public async Task<ActionResult<TestQuestionAnswer>> PostTestQuestionAnswer(
+            CreateTestQuestionAnswerRequest answer)
         {
-            _context.TestQuestionAnswers.Add(testQuestionAnswer);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetTestQuestionAnswer", new { id = testQuestionAnswer.Id }, testQuestionAnswer);
-        }
-
-        // DELETE: api/TestQuestionAnswers/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTestQuestionAnswer(int id)
-        {
-            var testQuestionAnswer = await _context.TestQuestionAnswers.FindAsync(id);
-            if (testQuestionAnswer == null)
+            var newAnswer = new TestQuestionAnswer
             {
-                return NotFound();
-            }
+                Text = answer.Text,
+                Score = answer.Score,
+                IsActive = true,
+                QuestionId = answer.QuestionId,
+            };
 
-            _context.TestQuestionAnswers.Remove(testQuestionAnswer);
-            await _context.SaveChangesAsync();
+            context.TestQuestionAnswers.Add(newAnswer);
+            await context.SaveChangesAsync();
 
-            return NoContent();
+            return Created();
         }
 
         private bool TestQuestionAnswerExists(int id)
         {
-            return _context.TestQuestionAnswers.Any(e => e.Id == id);
+            return context.TestQuestionAnswers.Any(e => e.Id == id);
         }
     }
 }

@@ -102,14 +102,14 @@ namespace vesta_api.Controllers
         }
 
         [HttpPost, Authorize(Roles = "clientSpecialist,admin")]
-        public async Task<ActionResult<Appointment>> PostAppointment(AppointmentViewModel appointment)
+        public async Task<ActionResult<Appointment>> PostAppointment(CreateAppointmentRequest createAppointment)
         {
             var newAppointment = new Appointment
             {
-                Datetime = appointment.Datetime,
-                ClientId = appointment.ClientId,
-                EmployeeId = appointment.EmployeeId,
-                ServiceId = appointment.ServiceId
+                Datetime = createAppointment.Datetime,
+                ClientId = createAppointment.ClientId,
+                EmployeeId = createAppointment.EmployeeId,
+                ServiceId = createAppointment.ServiceId
             };
             
             context.Appointments.Add(newAppointment);

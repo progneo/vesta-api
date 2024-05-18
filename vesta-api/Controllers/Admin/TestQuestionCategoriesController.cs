@@ -15,27 +15,23 @@ namespace vesta_api.Controllers.Admin
     [ApiController]
     [Produces("application/json")]
     [Authorize(Roles = "admin")]
-    public class TestQuestionCategoriesController : ControllerBase
+    public class TestQuestionCategoriesController(VestaContext context) : ControllerBase
     {
-        private readonly VestaContext _context;
-
-        public TestQuestionCategoriesController(VestaContext context)
-        {
-            _context = context;
-        }
-
         // GET: api/TestQuestionCategories
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TestQuestionCategory>>> GetTestQuestionCategories()
         {
-            return await _context.TestQuestionCategories.ToListAsync();
+            return await context.TestQuestionCategories.OrderBy(category => category.Id).ToListAsync();
         }
 
         // GET: api/TestQuestionCategories/5
         [HttpGet("{id}")]
         public async Task<ActionResult<TestQuestionCategory>> GetTestQuestionCategory(int id)
         {
-            var testQuestionCategory = await _context.TestQuestionCategories.FindAsync(id);
+            var testQuestionCategory = await context.TestQuestionCategories
+                .Include(category => category.TestQuestions)
+                .ThenInclude(question => question.TestQuestionAnswers)
+                .FirstOrDefaultAsync(category => category.Id == id);
 
             if (testQuestionCategory == null)
             {
@@ -54,11 +50,11 @@ namespace vesta_api.Controllers.Admin
                 return BadRequest();
             }
 
-            _context.Entry(testQuestionCategory).State = EntityState.Modified;
+            context.Entry(testQuestionCategory).State = EntityState.Modified;
 
             try
             {
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -77,33 +73,19 @@ namespace vesta_api.Controllers.Admin
 
         // POST: api/TestQuestionCategories
         [HttpPost]
-        public async Task<ActionResult<TestQuestionCategory>> PostTestQuestionCategory(TestQuestionCategory testQuestionCategory)
+        public async Task<ActionResult<TestQuestionCategory>> PostTestQuestionCategory(
+            TestQuestionCategory testQuestionCategory)
         {
-            _context.TestQuestionCategories.Add(testQuestionCategory);
-            await _context.SaveChangesAsync();
+            context.TestQuestionCategories.Add(testQuestionCategory);
+            await context.SaveChangesAsync();
 
-            return CreatedAtAction("GetTestQuestionCategory", new { id = testQuestionCategory.Id }, testQuestionCategory);
-        }
-
-        // DELETE: api/TestQuestionCategories/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTestQuestionCategory(int id)
-        {
-            var testQuestionCategory = await _context.TestQuestionCategories.FindAsync(id);
-            if (testQuestionCategory == null)
-            {
-                return NotFound();
-            }
-
-            _context.TestQuestionCategories.Remove(testQuestionCategory);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            return CreatedAtAction("GetTestQuestionCategory", new { id = testQuestionCategory.Id },
+                testQuestionCategory);
         }
 
         private bool TestQuestionCategoryExists(int id)
         {
-            return _context.TestQuestionCategories.Any(e => e.Id == id);
+            return context.TestQuestionCategories.Any(e => e.Id == id);
         }
     }
 }

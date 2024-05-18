@@ -107,17 +107,17 @@ namespace vesta_api.Controllers
         }
 
         [HttpPost, Authorize(Roles = "clientSpecialist,admin")]
-        public async Task<ActionResult<Client>> PostClient(ClientViewModel client)
+        public async Task<ActionResult<Client>> PostClient(CreateClientRequest createClient)
         {
             var newClient = context.Clients.Add(new Client
             {
-                FirstName = client.FirstName,
-                LastName = client.LastName,
-                Patronymic = client.Patronymic,
-                Sex = client.Sex,
-                BirthDate = client.BirthDate,
-                Address = client.Address,
-                DocumentId = client.DocumentId,
+                FirstName = createClient.FirstName,
+                LastName = createClient.LastName,
+                Patronymic = createClient.Patronymic,
+                Sex = createClient.Sex,
+                BirthDate = createClient.BirthDate,
+                Address = createClient.Address,
+                DocumentId = createClient.DocumentId,
                 IsActive = true
             });
             await context.SaveChangesAsync();

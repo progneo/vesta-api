@@ -1,7 +1,9 @@
 ﻿namespace vesta_api.Database.Models.View.Requests;
 
-public class ClientViewModel
+public class EditClientRequest
 {
+    public int Id { get; set; }
+    
     public string FirstName { get; set; } = null!;
 
     public string LastName { get; set; } = null!;
@@ -15,4 +17,6 @@ public class ClientViewModel
     public string Address { get; set; } = null!;
 
     public int DocumentId { get; set; }
+    
+    public bool IsActive { get; set; }
 }

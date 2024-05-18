@@ -15,36 +15,15 @@ namespace vesta_api.Controllers.Admin
     [ApiController]
     [Produces("application/json")]
     [Authorize(Roles = "admin")]
-    public class DocumentsController : ControllerBase
+    public class DocumentsController(VestaContext context) : ControllerBase
     {
-        private readonly VestaContext _context;
-
-        public DocumentsController(VestaContext context)
-        {
-            _context = context;
-        }
-
         // GET: api/Documents
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Document>>> GetDocuments()
         {
-            return await _context.Documents.ToListAsync();
+            return await context.Documents.OrderBy(d => d.Id).ToListAsync();
         }
-
-        // GET: api/Documents/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Document>> GetDocument(int id)
-        {
-            var document = await _context.Documents.FindAsync(id);
-
-            if (document == null)
-            {
-                return NotFound();
-            }
-
-            return document;
-        }
-
+        
         // PUT: api/Documents/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutDocument(int id, Document document)
@@ -54,11 +33,11 @@ namespace vesta_api.Controllers.Admin
                 return BadRequest();
             }
 
-            _context.Entry(document).State = EntityState.Modified;
+            context.Entry(document).State = EntityState.Modified;
 
             try
             {
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -75,35 +54,9 @@ namespace vesta_api.Controllers.Admin
             return NoContent();
         }
 
-        // POST: api/Documents
-        [HttpPost]
-        public async Task<ActionResult<Document>> PostDocument(Document document)
-        {
-            _context.Documents.Add(document);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetDocument", new { id = document.Id }, document);
-        }
-
-        // DELETE: api/Documents/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteDocument(int id)
-        {
-            var document = await _context.Documents.FindAsync(id);
-            if (document == null)
-            {
-                return NotFound();
-            }
-
-            _context.Documents.Remove(document);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
         private bool DocumentExists(int id)
         {
-            return _context.Documents.Any(e => e.Id == id);
+            return context.Documents.Any(e => e.Id == id);
         }
     }
 }

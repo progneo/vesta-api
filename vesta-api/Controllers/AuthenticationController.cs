@@ -22,14 +22,14 @@ public class AuthenticationController(VestaContext context) : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     [HttpPost("register"), AllowAnonymous] // In the future replace AllowAnonymous with Authorize(Roles = "admin")
-    public async Task<IActionResult> Register(NewUserViewModel request)
+    public async Task<IActionResult> Register(CreateUserRequest request)
     {
         if (context.Users.Any(u => u.Username == request.Username))
         {
             return Conflict("Username already exist");
         }
 
-        CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordKey);
+        CreatePasswordHash(request.Password, out var passwordHash, out var passwordKey);
 
         var user = new User
         {
@@ -45,13 +45,13 @@ public class AuthenticationController(VestaContext context) : ControllerBase
 
         await context.SaveChangesAsync();
 
-        return StatusCode(201, "User was registered");
+        return Created();
     }
 
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [HttpPost("login"), AllowAnonymous]
-    public async Task<IActionResult> Login(UserViewModel request)
+    public async Task<IActionResult> Login(LoginRequest request)
     {
         var user = await context.Users
             .Include(u => u.Employee)
@@ -119,6 +119,28 @@ public class AuthenticationController(VestaContext context) : ControllerBase
     {
         return Task.FromResult<IActionResult>(
             Ok(User.FindFirst(c => c.Type == ClaimsIdentity.DefaultNameClaimType) != null));
+    }
+
+    [HttpPost("change_password"), Authorize(Roles = "admin")]
+    public async Task<IActionResult> ChangePassword(EditPasswordRequest passwordRequest)
+    {
+        var user = await context.Users.FirstOrDefaultAsync(user => user.Id == passwordRequest.UserId);
+
+        if (user == null)
+        {
+            return await Task.FromResult<IActionResult>(NotFound());
+        }
+
+        CreatePasswordHash(passwordRequest.Password, out var passwordHash, out var passwordKey);
+
+        user.PasswordHash = passwordHash;
+        user.PasswordKey = passwordKey;
+
+        context.Entry(user).State = EntityState.Modified;
+
+        await context.SaveChangesAsync();
+
+        return await Task.FromResult<IActionResult>(Ok("Password was changed"));
     }
 
     private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordKey)

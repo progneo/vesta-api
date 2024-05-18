@@ -1,6 +1,6 @@
 ﻿namespace vesta_api.Database.Models.View.Requests;
 
-public class UserViewModel
+public class LoginRequest
 {
     public string Username { get; set; } = string.Empty;
 

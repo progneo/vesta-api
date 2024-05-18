@@ -15,34 +15,13 @@ namespace vesta_api.Controllers.Admin
     [ApiController]
     [Produces("application/json")]
     [Authorize(Roles = "admin")]
-    public class ServiceController : ControllerBase
+    public class ServicesController(VestaContext context) : ControllerBase
     {
-        private readonly VestaContext _context;
-
-        public ServiceController(VestaContext context)
-        {
-            _context = context;
-        }
-
         // GET: api/Service
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Service>>> GetServices()
         {
-            return await _context.Services.ToListAsync();
-        }
-
-        // GET: api/Service/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Service>> GetService(int id)
-        {
-            var service = await _context.Services.FindAsync(id);
-
-            if (service == null)
-            {
-                return NotFound();
-            }
-
-            return service;
+            return await context.Services.OrderBy(service => service.Id).ToListAsync();
         }
 
         // PUT: api/Service/5
@@ -54,11 +33,11 @@ namespace vesta_api.Controllers.Admin
                 return BadRequest();
             }
 
-            _context.Entry(service).State = EntityState.Modified;
+            context.Entry(service).State = EntityState.Modified;
 
             try
             {
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -79,31 +58,16 @@ namespace vesta_api.Controllers.Admin
         [HttpPost]
         public async Task<ActionResult<Service>> PostService(Service service)
         {
-            _context.Services.Add(service);
-            await _context.SaveChangesAsync();
+            context.Services.Add(service);
+            await context.SaveChangesAsync();
 
-            return CreatedAtAction("GetService", new { id = service.Id }, service);
+            return Created();
         }
 
-        // DELETE: api/Service/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteService(int id)
-        {
-            var service = await _context.Services.FindAsync(id);
-            if (service == null)
-            {
-                return NotFound();
-            }
-
-            _context.Services.Remove(service);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
 
         private bool ServiceExists(int id)
         {
-            return _context.Services.Any(e => e.Id == id);
+            return context.Services.Any(e => e.Id == id);
         }
     }
 }

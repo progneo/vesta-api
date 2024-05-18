@@ -129,7 +129,7 @@ namespace vesta_api.Controllers
         }
 
         [HttpPost, Authorize(Roles = "clientSpecialist,admin")]
-        public async Task<ActionResult<Testing>> PostTesting(TestingViewModel test)
+        public async Task<ActionResult<Testing>> PostTesting(CreateTestingAnswersOfClientRequest test)
         {
             var newTesting = context.Testings.Add(new Testing
             {

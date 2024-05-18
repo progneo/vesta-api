@@ -1,6 +1,6 @@
 ﻿namespace vesta_api.Database.Models.View.Requests;
 
-public class DocumentViewModel
+public class CreateDocumentRequest
 {
     public string Series { get; set; } = null!;
 

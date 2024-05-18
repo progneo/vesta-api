@@ -3,10 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using vesta_api.Database.Context;
 using vesta_api.Database.Models;
+using vesta_api.Database.Models.View.Requests;
 
 namespace vesta_api.Controllers.Admin
 {
-    [Route("api/[controller]")]
+    [Route("api/admin/[controller]")]
     [ApiController]
     [Produces("application/json")]
     [Authorize(Roles = "admin")]
@@ -16,33 +17,29 @@ namespace vesta_api.Controllers.Admin
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Responsible>>> GetResponsibles()
         {
-            return await context.Responsibles.ToListAsync();
-        }
-
-        // GET: api/Responsible/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Responsible>> GetResponsible(int id)
-        {
-            var responsible = await context.Responsibles.FindAsync(id);
-
-            if (responsible == null)
-            {
-                return NotFound();
-            }
-
-            return responsible;
+            return await context.Responsibles.OrderBy(responsible => responsible.Id).ToListAsync();
         }
 
         // PUT: api/Responsible/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutResponsible(int id, Responsible responsible)
+        public async Task<IActionResult> PutResponsible(int id, EditResponsibleRequest responsible)
         {
             if (id != responsible.Id)
             {
                 return BadRequest();
             }
 
-            context.Entry(responsible).State = EntityState.Modified;
+            var editingResponsible = await context.Responsibles.FirstOrDefaultAsync(r => r.Id == responsible.Id);
+
+            if (editingResponsible == null) return NotFound();
+
+            editingResponsible.FirstName = responsible.FirstName;
+            editingResponsible.LastName = responsible.LastName;
+            editingResponsible.Patronymic = responsible.Patronymic;
+            editingResponsible.PhoneNumber = responsible.PhoneNumber;
+            editingResponsible.Type = responsible.Type;
+            
+            context.Entry(editingResponsible).State = EntityState.Modified;
 
             try
             {
@@ -57,32 +54,6 @@ namespace vesta_api.Controllers.Admin
 
                 throw;
             }
-
-            return NoContent();
-        }
-
-        // POST: api/Responsible
-        [HttpPost]
-        public async Task<ActionResult<Responsible>> PostResponsible(Responsible responsible)
-        {
-            context.Responsibles.Add(responsible);
-            await context.SaveChangesAsync();
-
-            return CreatedAtAction("GetResponsible", new { id = responsible.Id }, responsible);
-        }
-
-        // DELETE: api/Responsible/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteResponsible(int id)
-        {
-            var responsible = await context.Responsibles.FindAsync(id);
-            if (responsible == null)
-            {
-                return NotFound();
-            }
-
-            context.Responsibles.Remove(responsible);
-            await context.SaveChangesAsync();
 
             return NoContent();
         }

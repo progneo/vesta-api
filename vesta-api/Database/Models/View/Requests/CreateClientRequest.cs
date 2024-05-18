@@ -1,6 +1,6 @@
 ﻿namespace vesta_api.Database.Models.View.Requests;
 
-public partial class ResponsibleViewModel
+public class CreateClientRequest
 {
     public string FirstName { get; set; } = null!;
 
@@ -8,9 +8,11 @@ public partial class ResponsibleViewModel
 
     public string Patronymic { get; set; } = null!;
 
-    public string Type { get; set; } = null!;
+    public string Sex { get; set; } = null!;
 
-    public string PhoneNumber { get; set; } = null!;
+    public DateTime BirthDate { get; set; }
+
+    public string Address { get; set; } = null!;
 
     public int DocumentId { get; set; }
 }

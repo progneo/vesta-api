@@ -1,6 +1,6 @@
 ﻿namespace vesta_api.Database.Models.View.Requests;
 
-public class NewUserViewModel
+public class CreateUserRequest
 {
     public string Username { get; set; } = string.Empty;
 

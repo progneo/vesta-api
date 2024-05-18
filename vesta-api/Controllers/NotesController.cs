@@ -48,12 +48,12 @@ namespace vesta_api.Controllers
         }
 
         [HttpPost, Authorize]
-        public async Task<ActionResult<Note>> PostNote(NoteViewModel note)
+        public async Task<ActionResult<Note>> PostNote(CreateNoteRequest createNote)
         {
             var newNote = new Note
             {
-                Text = note.Text,
-                ClientId = note.ClientId,
+                Text = createNote.Text,
+                ClientId = createNote.ClientId,
                 IsActive = true
             };
 

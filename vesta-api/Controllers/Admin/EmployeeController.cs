@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using vesta_api.Database.Context;
 using vesta_api.Database.Models;
+using vesta_api.Database.Models.View.Requests;
 
 namespace vesta_api.Controllers.Admin
 {
@@ -16,21 +17,7 @@ namespace vesta_api.Controllers.Admin
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees()
         {
-            return await context.Employees.ToListAsync();
-        }
-
-        // GET: api/Employee/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Employee>> GetEmployee(int id)
-        {
-            var employee = await context.Employees.FindAsync(id);
-
-            if (employee == null)
-            {
-                return NotFound();
-            }
-
-            return employee;
+            return await context.Employees.OrderBy(employee => employee.Id).ToListAsync();
         }
 
         // PUT: api/Employee/
@@ -63,28 +50,19 @@ namespace vesta_api.Controllers.Admin
 
         // POST: api/Employee
         [HttpPost]
-        public async Task<ActionResult<Employee>> PostEmployee(Employee employee)
+        public async Task<ActionResult<Employee>> PostEmployee(CreateEmployeeRequest employee)
         {
-            context.Employees.Add(employee);
-            await context.SaveChangesAsync();
-
-            return CreatedAtAction("GetEmployee", new { id = employee.Id }, employee);
-        }
-
-        // DELETE: api/Employee/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteEmployee(int id)
-        {
-            var employee = await context.Employees.FindAsync(id);
-            if (employee == null)
+            var newEmployee = new Employee
             {
-                return NotFound();
-            }
+                LastName = employee.LastName,
+                FirstName = employee.FirstName,
+                Patronymic = employee.Patronymic
+            };
 
-            context.Employees.Remove(employee);
+            context.Employees.Add(newEmployee);
             await context.SaveChangesAsync();
 
-            return NoContent();
+            return Created();
         }
 
         private bool EmployeeExists(int id)

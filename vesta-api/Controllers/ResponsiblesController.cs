@@ -61,22 +61,22 @@ namespace vesta_api.Controllers
         }
 
         [HttpPost, Authorize(Roles = "clientSpecialist,admin")]
-        public async Task<ActionResult<Responsible>> PostResponsible(ResponsibleViewModel responsible)
+        public async Task<ActionResult<Responsible>> PostResponsible(CreateResponsibleRequest createResponsible)
         {
             var existingResponsible = await
-                context.Responsibles.FirstOrDefaultAsync(r => r.PhoneNumber == responsible.PhoneNumber);
+                context.Responsibles.FirstOrDefaultAsync(r => r.PhoneNumber == createResponsible.PhoneNumber);
 
             if (existingResponsible != null)
                 return CreatedAtAction("GetResponsible", new { id = existingResponsible.Id }, existingResponsible);
 
             var newResponsible = new Responsible
             {
-                FirstName = responsible.FirstName,
-                LastName = responsible.LastName,
-                Patronymic = responsible.Patronymic,
-                Type = responsible.Type,
-                PhoneNumber = responsible.PhoneNumber,
-                DocumentId = responsible.DocumentId
+                FirstName = createResponsible.FirstName,
+                LastName = createResponsible.LastName,
+                Patronymic = createResponsible.Patronymic,
+                Type = createResponsible.Type,
+                PhoneNumber = createResponsible.PhoneNumber,
+                DocumentId = createResponsible.DocumentId
             };
 
             context.Responsibles.Add(newResponsible);

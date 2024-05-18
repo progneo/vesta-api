@@ -1,6 +1,6 @@
 ﻿namespace vesta_api.Database.Models.View.Requests;
 
-public partial class AppointmentViewModel
+public partial class CreateAppointmentRequest
 {
     public DateTime Datetime { get; set; }
 
